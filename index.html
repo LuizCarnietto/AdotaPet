@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adota Pet — Documentação do Projeto</title>
+<meta name="description" content="Adota Pet: plataforma que conecta ONGs e adotantes de animais. Diagramas de casos de uso, classes e entidade-relacionamento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F2F1E8;
+    --ink: #23281F;
+    --ink-soft: #4B5142;
+    --moss: #4C6B4F;
+    --moss-deep: #33452F;
+    --amber: #C1812E;
+    --line: #D7D6C5;
+    --card-bg: #FCFBF6;
+    --max: 760px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--moss-deep); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+  h1, h2, h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .wrap-wide {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* HERO */
+  header.hero {
+    padding: 96px 0 64px;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero .eyebrow-mark{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom: 22px;
+  }
+  .paw {
+    width: 30px; height: 30px;
+    flex: none;
+  }
+  .hero .kicker {
+    font-size: 15px;
+    color: var(--moss-deep);
+    letter-spacing: 0.01em;
+  }
+  h1.title {
+    font-size: clamp(2.6rem, 6vw, 4.2rem);
+    font-optical-sizing: auto;
+    margin-bottom: 20px;
+  }
+  .tagline {
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    max-width: 46ch;
+  }
+
+  /* SECTIONS */
+  section { padding: 56px 0; border-bottom: 1px solid var(--line); }
+  section:last-of-type { border-bottom: none; }
+
+  h2.section-title {
+    font-size: 1.7rem;
+    margin-bottom: 22px;
+  }
+
+  p { margin: 0 0 16px; color: var(--ink-soft); max-width: 68ch; }
+  p:last-child { margin-bottom: 0; }
+
+  /* TECH LIST */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 8px;
+  }
+  .tech-item {
+    border-left: 2px solid var(--moss);
+    padding-left: 16px;
+  }
+  .tech-item .role {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .tech-item .stack {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    color: var(--ink);
+  }
+
+  /* ACTORS */
+  .actors {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+  }
+  .actor {
+    flex: 1 1 260px;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    padding: 22px 24px;
+  }
+  .actor h3 { font-size: 1.1rem; margin-bottom: 10px; }
+  .actor p { margin: 0; font-size: 0.96rem; }
+
+  /* DIAGRAMS */
+  .diagram-block { margin-top: 40px; }
+  .diagram-block:first-of-type { margin-top: 0; }
+  .diagram-block h3 {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+  .diagram-block p { margin-bottom: 20px; }
+  figure {
+    margin: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    padding: 18px;
+  }
+  figure img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-top: 12px;
+    text-align: center;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 48px 0 72px;
+  }
+  footer p { font-size: 0.9rem; color: var(--ink-soft); }
+  footer .links { margin-top: 8px; }
+  footer .links a { margin-right: 18px; }
+
+  @media (max-width: 600px){
+    header.hero { padding: 64px 0 40px; }
+    section { padding: 40px 0; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow-mark">
+      <svg class="paw" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="32" cy="40" rx="16" ry="13" fill="#4C6B4F"/>
+        <ellipse cx="14" cy="24" rx="7" ry="9" fill="#4C6B4F"/>
+        <ellipse cx="50" cy="24" rx="7" ry="9" fill="#4C6B4F"/>
+        <ellipse cx="22" cy="10" rx="6" ry="8" fill="#4C6B4F"/>
+        <ellipse cx="42" cy="10" rx="6" ry="8" fill="#4C6B4F"/>
+      </svg>
+      <span class="kicker">Documentação do projeto</span>
+    </div>
+    <h1 class="title">Adota Pet</h1>
+    <p class="tagline">Uma plataforma que conecta ONGs de proteção animal a futuras famílias, do primeiro cadastro até a adoção concluída.</p>
+  </div>
+</header>
+
+<section id="sobre">
+  <div class="wrap">
+    <h2 class="section-title">Sobre o projeto</h2>
+    <p>O Adota Pet organiza o processo de adoção de animais em um único lugar. ONGs cadastram e mantêm os animais disponíveis, adotantes acompanham o andamento das suas solicitações, e um administrador modera o funcionamento geral da plataforma.</p>
+    <p>O sistema cobre o fluxo completo: visualização dos animais disponíveis, envio de formulário de adoção, aprovação ou recusa pela ONG responsável e acompanhamento do status até a conclusão.</p>
+
+    <div class="actors">
+      <div class="actor">
+        <h3>ONG</h3>
+        <p>Cadastra, edita e remove animais, gerencia formulários e solicitações de adoção, e lista adotantes.</p>
+      </div>
+      <div class="actor">
+        <h3>Adotante</h3>
+        <p>Cria conta, visualiza animais disponíveis, solicita adoção e acompanha o status do pedido.</p>
+      </div>
+      <div class="actor">
+        <h3>Administrador</h3>
+        <p>Valida o cadastro de ONGs, modera usuários e denúncias, e supervisiona a plataforma.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tecnologias">
+  <div class="wrap">
+    <h2 class="section-title">Tecnologias</h2>
+    <div class="tech-grid">
+      <div class="tech-item">
+        <span class="role">Backend</span>
+        <span class="stack">Java</span>
+      </div>
+      <div class="tech-item">
+        <span class="role">Frontend</span>
+        <span class="stack">React + TypeScript</span>
+      </div>
+      <div class="tech-item">
+        <span class="role">Banco de dados</span>
+        <span class="stack">MySQL</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="diagramas">
+  <div class="wrap-wide">
+    <h2 class="section-title">Diagramas</h2>
+
+    <div class="diagram-block">
+      <h3>Diagrama de casos de uso</h3>
+      <p>Mapeia as ações disponíveis para cada ator do sistema: a ONG cadastra e gerencia animais e solicitações, enquanto o adotante visualiza animais, solicita e acompanha suas adoções.</p>
+      <figure>
+        <img src="assets/diagrama-uso.png" alt="Diagrama de casos de uso do Adota Pet, mostrando as ações da ONG e do Adotante">
+        <figcaption>Casos de uso — ONG e Adotante</figcaption>
+      </figure>
+    </div>
+
+    <div class="diagram-block">
+      <h3>Diagrama de classes</h3>
+      <p>Estrutura as entidades do sistema — Usuário, Animal, Adoção e Formulário de Adoção — e como os tipos de usuário (ONG, Adotante e Administrador) herdam comportamentos e responsabilidades específicas.</p>
+      <figure>
+        <img src="assets/diagrama-classes.png" alt="Diagrama de classes do Adota Pet, com as classes Usuario, Animal, Adocao e Formulario de Adocao">
+        <figcaption>Classes e relacionamentos do domínio</figcaption>
+      </figure>
+    </div>
+
+    <div class="diagram-block">
+      <h3>Diagrama de entidade e relacionamento</h3>
+      <p>Representa como os dados são armazenados: usuários preenchem formulários que originam adoções, ONGs cadastram animais, e um administrador modera os usuários da plataforma.</p>
+      <figure>
+        <img src="assets/diagrama-er.png" alt="Diagrama de entidade e relacionamento do Adota Pet">
+        <figcaption>Modelo de entidade e relacionamento</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Adota Pet — trabalho acadêmico em desenvolvimento.</p>
+    <div class="links">
+      <a href="#sobre">Sobre</a>
+      <a href="#tecnologias">Tecnologias</a>
+      <a href="#diagramas">Diagramas</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
