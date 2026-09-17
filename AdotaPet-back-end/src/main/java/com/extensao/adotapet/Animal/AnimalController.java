@@ -1,6 +1,5 @@
 package com.extensao.adotapet.Animal;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +13,16 @@ public class AnimalController {
     private AnimalService animalService;
 
     @PostMapping
-    public AnimalResponseDTO cadastrarAnimal(@RequestBody AnimalRequestDTO data){
+    public AnimalResponseDTO cadastrarAnimal(
+            @RequestBody AnimalRequestDTO data
+    ){
         return animalService.cadastrarAnimal(data);
     }
 
     @PostMapping("/buscar")
-    public List<AnimalResponseDTO> buscar(@RequestBody AnimalFiltroDTO filtro) {
+    public List<AnimalResponseDTO> buscar(
+            @RequestBody AnimalFiltroDTO filtro
+    ) {
         return animalService.buscar(filtro);
     }
 
@@ -29,28 +32,38 @@ public class AnimalController {
     }
 
     @GetMapping("/{id}")
-    public AnimalResponseDTO getById(@PathVariable Long id){
+    public AnimalResponseDTO getById(
+            @PathVariable Long id
+    ){
         return animalService.getById(id);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable Long id){
-        animalService.deleteById(id);
+    public void deleteById(
+            @PathVariable Long id
+    ){
+        animalService.delete(id);
     }
 
     @PutMapping("/{id}/inativar")
-    public void inativar(@PathVariable Long id){
+    public void inativar(
+            @PathVariable Long id
+    ){
         animalService.inativar(id);
     }
 
     @PutMapping("/{id}/ativar")
-    public void ativar(@PathVariable Long id){
+    public void ativar(
+            @PathVariable Long id
+    ){
         animalService.ativar(id);
     }
 
     @PutMapping("/{id}")
-    public AnimalResponseDTO atualizaParcial(@PathVariable Long id,
-                                           @RequestBody AnimalUpdateDTO dto){
-        return  animalService.atualizaParcial(id, dto);
+    public AnimalResponseDTO atualizaParcial(
+            @PathVariable Long id,
+            @RequestBody AnimalUpdateDTO dto
+    ){
+        return animalService.atualizaParcial(id, dto);
     }
 }

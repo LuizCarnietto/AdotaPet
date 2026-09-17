@@ -1,20 +1,234 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { apiService } from "../../services/ApiService";
 
 export default function RegistroAnimal() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        const tipoUsuario = localStorage.getItem("tipoUsuario");
-        if (tipoUsuario !== "ROLE_ONG") {
-            navigate("/");
+  useEffect(() => {
+    const tipoUsuario = localStorage.getItem("tipoUsuario");
+
+    if (tipoUsuario !== "ROLE_ONG") {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const cadastrarAnimal = async () => {
+    try {
+      const nomeInput = document.querySelector(
+        "#descricaoAnimal > input",
+      ) as HTMLInputElement | null;
+
+      const descricaoInput = document.querySelector(
+        "#descricaoAnimal textarea",
+      ) as HTMLTextAreaElement | null;
+
+      const racaInput = document.getElementById(
+        "raca",
+      ) as HTMLInputElement | null;
+
+      const idadeInput = document.getElementById(
+        "idade",
+      ) as HTMLSelectElement | null;
+
+      const especieInput = document.getElementById(
+        "especie",
+      ) as HTMLSelectElement | null;
+
+      const microchipInput = document.getElementById(
+        "microchip",
+      ) as HTMLSelectElement | null;
+
+      const sexoInput = document.getElementById(
+        "sexo",
+      ) as HTMLSelectElement | null;
+
+      const porteInput = document.getElementById(
+        "porte",
+      ) as HTMLSelectElement | null;
+
+      const corInput = document.getElementById(
+        "cor",
+      ) as HTMLInputElement | null;
+
+      const vacinadoInput = document.getElementById(
+        "vacinado",
+      ) as HTMLSelectElement | null;
+
+      const localizacaoInput = document.getElementById(
+        "localizacao",
+      ) as HTMLInputElement | null;
+
+      // valores
+
+      const nome = nomeInput?.value.trim() || "";
+      const comportamento = descricaoInput?.value.trim() || "";
+      const raca = racaInput?.value.trim() || "";
+      const idade = idadeInput?.value || "";
+      const especie = especieInput?.value || "";
+      const microchip = microchipInput?.value || "";
+      const sexo = sexoInput?.value || "";
+      const porte = porteInput?.value || "";
+      const cor = corInput?.value.trim() || "";
+      const vacinado = vacinadoInput?.value || "";
+      const localizacao = localizacaoInput?.value.trim() || "";
+
+      // Validando
+
+      if (!nome) {
+        alert("Digite o nome do animal.");
+        return;
+      }
+
+      if (!raca) {
+        alert("Digite a raça do animal.");
+        return;
+      }
+
+      if (!idade) {
+        alert("Selecione a idade do animal.");
+        return;
+      }
+
+      if (!especie) {
+        alert("Selecione o tipo de animal.");
+        return;
+      }
+
+      if (!microchip) {
+        alert("Informe se o animal possui microchip.");
+        return;
+      }
+
+      if (!sexo) {
+        alert("Selecione o sexo do animal.");
+        return;
+      }
+
+      if (!porte) {
+        alert("Selecione o porte do animal.");
+        return;
+      }
+
+      if (!cor) {
+        alert("Digite a cor do animal.");
+        return;
+      }
+
+      if (!vacinado) {
+        alert("Informe se o animal é vacinado.");
+        return;
+      }
+
+      if (!localizacao) {
+        alert("Digite a localização do animal.");
+        return;
+      }
+
+      if (!comportamento) {
+        alert("Descreva o animal.");
+        return;
+      }
+
+      // fotos
+
+      const fotos = Array.from(
+        document.querySelectorAll<HTMLImageElement>("img.miniatura"),
+      )
+        .map((img) => img.src)
+        .filter((src) => src);
+
+      if (fotos.length === 0) {
+        alert("Adicione pelo menos uma foto do animal.");
+        return;
+      }
+
+      // convertendo para o formato esperado pelo backend (Java)
+
+      const payload = {
+        nome: nome,
+
+        raca: raca,
+
+        idade: idade.toUpperCase(),
+
+        historicoSaude: "",
+
+        comportamento: comportamento,
+
+        fotos: JSON.stringify(fotos),
+
+        possuiChip: microchip === "sim",
+
+        localizacao: localizacao,
+
+        vacinado: vacinado === "sim",
+
+        especie: especie.toUpperCase(),
+
+        porte: porte.toUpperCase(),
+
+        sexo: sexo === "masculino" ? "MACHO" : "FEMEA",
+
+        // O backend define DISPONIVEL
+        // automaticamente no AnimalService.
+        status: null,
+
+        cor: cor,
+      };
+
+      console.log("Dados enviados para o backend:");
+      console.log(payload);
+
+      // POST /animal
+
+      const response = await apiService.post("/animal", payload);
+
+      console.log("Animal cadastrado:");
+      console.log(response.data);
+
+      alert("Animal cadastrado com sucesso!");
+
+      // vai para a lista de adoção
+
+      navigate("/listaadotar");
+    } catch (error: any) {
+      console.error("Erro ao cadastrar animal:", error);
+
+      if (error.response) {
+        console.error("Status:", error.response.status);
+
+        console.error("Resposta:", error.response.data);
+
+        if (error.response.status === 401) {
+          alert("Sua sessão expirou. Faça login novamente.");
+
+          localStorage.removeItem("token");
+          localStorage.removeItem("tipoUsuario");
+
+          navigate("/login");
+
+          return;
         }
-    }, [navigate]);
+
+        if (error.response.status === 403) {
+          alert("Apenas usuários do tipo ONG podem cadastrar animais.");
+
+          return;
+        }
+
+        alert(
+          "Erro ao cadastrar o animal. Verifique os dados e tente novamente.",
+        );
+
+        return;
+      }
+
+      alert("Não foi possível conectar ao servidor.");
+    }
+  };
 
   return (
-
-
-
     <>
       <style>
         {`
@@ -345,23 +559,27 @@ export default function RegistroAnimal() {
           }
 
           #botaoAzul:hover {
-          background-color: #1ab0f0;
-          transition: background-color 0.2s ease;
-        }
+            background-color: #1ab0f0;
+            transition: background-color 0.2s ease;
+          }
         `}
       </style>
 
       <header>
         <nav>
           <a href="/login">Entrar</a>
+
           <a href="/listaadotar">Adotar</a>
+
           <a href="/">
             <img
               src="/imagens/logoMelhor.png"
               alt="Logo com desenho e escrito"
             />
           </a>
+
           <a href="/#sobre">Sobre</a>
+
           <a href="/#faq">F.A.Q</a>
         </nav>
       </header>
@@ -370,21 +588,20 @@ export default function RegistroAnimal() {
         <div id="containerFotosAnimal">
           <div id="fotoAnimal">
             <img id="imagemGrande" />
+
             <div id="placeHolderImagem">Nenhuma imagem selecionada</div>
           </div>
 
           {/* Miniaturas com controles */}
           <div id="cardFotoAnimal">
+            {/*slot 1*/}
 
-            {/* Slot 1 */}
             <div className="miniaturaWrapper" id="wrapper-0">
               <div className="miniaturaControles">
                 <button
                   className="btnMiniatura btnAdicionar"
                   title="Adicionar imagem"
-                  onClick={() =>
-                    document.getElementById("input-0")?.click()
-                  }
+                  onClick={() => document.getElementById("input-0")?.click()}
                 >
                   + Add
                 </button>
@@ -393,28 +610,23 @@ export default function RegistroAnimal() {
                   className="btnMiniatura btnApagar"
                   title="Apagar imagem"
                   onClick={() => {
-                    const wrapper =
-                      document.getElementById("wrapper-0");
+                    const wrapper = document.getElementById("wrapper-0");
 
-                    const img =
-                      wrapper?.querySelector("img.miniatura");
+                    const img = wrapper?.querySelector("img.miniatura");
 
                     if (!img) return;
 
-                    const eraAtiva =
-                      img.classList.contains("ativa");
+                    const eraAtiva = img.classList.contains("ativa");
 
                     img.remove();
 
-                    const input =
-                      document.getElementById(
-                        "input-0"
-                      ) as HTMLInputElement | null;
+                    const input = document.getElementById(
+                      "input-0",
+                    ) as HTMLInputElement | null;
 
                     if (input) input.value = "";
 
-                    const slot =
-                      document.createElement("div");
+                    const slot = document.createElement("div");
 
                     slot.className = "slotVazio";
                     slot.textContent = "+";
@@ -422,44 +634,39 @@ export default function RegistroAnimal() {
                     wrapper?.appendChild(slot);
 
                     if (eraAtiva) {
-                      const imagemGrande =
-                        document.getElementById(
-                          "imagemGrande"
-                        ) as HTMLImageElement | null;
+                      const imagemGrande = document.getElementById(
+                        "imagemGrande",
+                      ) as HTMLImageElement | null;
 
                       if (imagemGrande) {
                         imagemGrande.src = "";
+
                         imagemGrande.classList.remove("ativa");
 
                         const placeholder =
-                          document.getElementById(
-                            "placeHolderImagem"
-                          );
+                          document.getElementById("placeHolderImagem");
 
                         if (placeholder) {
                           placeholder.classList.remove("oculto");
                         }
                       }
 
-                      const outra =
-                        document.querySelector(
-                          "img.miniatura"
-                        ) as HTMLImageElement | null;
+                      const outra = document.querySelector(
+                        "img.miniatura",
+                      ) as HTMLImageElement | null;
 
                       if (outra) {
-                        const grande =
-                          document.getElementById(
-                            "imagemGrande"
-                          ) as HTMLImageElement | null;
+                        const grande = document.getElementById(
+                          "imagemGrande",
+                        ) as HTMLImageElement | null;
 
                         if (grande) {
                           grande.src = outra.src;
+
                           grande.classList.add("ativa");
 
                           const placeholder =
-                            document.getElementById(
-                              "placeHolderImagem"
-                            );
+                            document.getElementById("placeHolderImagem");
 
                           if (placeholder) {
                             placeholder.classList.add("oculto");
@@ -467,14 +674,8 @@ export default function RegistroAnimal() {
                         }
 
                         document
-                          .querySelectorAll(
-                            "img.miniatura"
-                          )
-                          .forEach((img) =>
-                            img.classList.remove(
-                              "ativa"
-                            )
-                          );
+                          .querySelectorAll("img.miniatura")
+                          .forEach((img) => img.classList.remove("ativa"));
 
                         outra.classList.add("ativa");
                       }
@@ -491,58 +692,42 @@ export default function RegistroAnimal() {
                 className="inputArquivo"
                 id="input-0"
                 onChange={(e) => {
-                  if (
-                    !e.target.files ||
-                    !e.target.files[0]
-                  )
-                    return;
+                  if (!e.target.files || !e.target.files[0]) return;
 
                   const reader = new FileReader();
 
                   reader.onload = (event) => {
-                    const wrapper =
-                      document.getElementById(
-                        "wrapper-0"
-                      );
+                    const wrapper = document.getElementById("wrapper-0");
 
                     if (!wrapper) return;
 
-                    const slotVazio =
-                      wrapper.querySelector(
-                        ".slotVazio"
-                      );
+                    const slotVazio = wrapper.querySelector(".slotVazio");
 
                     if (slotVazio) {
                       slotVazio.remove();
                     }
 
-                    let img =
-                      wrapper.querySelector(
-                        "img.miniatura"
-                      ) as HTMLImageElement | null;
+                    let img = wrapper.querySelector(
+                      "img.miniatura",
+                    ) as HTMLImageElement | null;
 
                     if (!img) {
-                      img =
-                        document.createElement("img");
+                      img = document.createElement("img");
 
-                      img.className =
-                        "miniatura";
+                      img.className = "miniatura";
 
                       img.onclick = function () {
-                        const imagemGrande =
-                          document.getElementById(
-                            "imagemGrande"
-                          ) as HTMLImageElement | null;
+                        const imagemGrande = document.getElementById(
+                          "imagemGrande",
+                        ) as HTMLImageElement | null;
 
                         if (imagemGrande) {
-                          imagemGrande.src =
-                            img!.src;
+                          imagemGrande.src = img!.src;
+
                           imagemGrande.classList.add("ativa");
 
                           const placeholder =
-                            document.getElementById(
-                              "placeHolderImagem"
-                            );
+                            document.getElementById("placeHolderImagem");
 
                           if (placeholder) {
                             placeholder.classList.add("oculto");
@@ -550,14 +735,8 @@ export default function RegistroAnimal() {
                         }
 
                         document
-                          .querySelectorAll(
-                            "img.miniatura"
-                          )
-                          .forEach((image) =>
-                            image.classList.remove(
-                              "ativa"
-                            )
-                          );
+                          .querySelectorAll("img.miniatura")
+                          .forEach((image) => image.classList.remove("ativa"));
 
                         img!.classList.add("ativa");
                       };
@@ -565,22 +744,19 @@ export default function RegistroAnimal() {
                       wrapper.appendChild(img);
                     }
 
-                    img.src =
-                      event.target?.result as string;
+                    img.src = event.target?.result as string;
 
-                    const imagemGrande =
-                      document.getElementById(
-                        "imagemGrande"
-                      ) as HTMLImageElement | null;
+                    const imagemGrande = document.getElementById(
+                      "imagemGrande",
+                    ) as HTMLImageElement | null;
 
                     if (imagemGrande) {
                       imagemGrande.src = img.src;
+
                       imagemGrande.classList.add("ativa");
 
                       const placeholder =
-                        document.getElementById(
-                          "placeHolderImagem"
-                        );
+                        document.getElementById("placeHolderImagem");
 
                       if (placeholder) {
                         placeholder.classList.add("oculto");
@@ -588,36 +764,27 @@ export default function RegistroAnimal() {
                     }
 
                     document
-                      .querySelectorAll(
-                        "img.miniatura"
-                      )
-                      .forEach((image) =>
-                        image.classList.remove(
-                          "ativa"
-                        )
-                      );
+                      .querySelectorAll("img.miniatura")
+                      .forEach((image) => image.classList.remove("ativa"));
 
                     img.classList.add("ativa");
                   };
 
-                  reader.readAsDataURL(
-                    e.target.files[0]
-                  );
+                  reader.readAsDataURL(e.target.files[0]);
                 }}
               />
 
               <div className="slotVazio">+</div>
             </div>
 
-            {/* Slot 2 */}
+            {/* slot 2*/}
+
             <div className="miniaturaWrapper" id="wrapper-1">
               <div className="miniaturaControles">
                 <button
                   className="btnMiniatura btnAdicionar"
                   title="Adicionar imagem"
-                  onClick={() =>
-                    document.getElementById("input-1")?.click()
-                  }
+                  onClick={() => document.getElementById("input-1")?.click()}
                 >
                   + Add
                 </button>
@@ -626,28 +793,23 @@ export default function RegistroAnimal() {
                   className="btnMiniatura btnApagar"
                   title="Apagar imagem"
                   onClick={() => {
-                    const wrapper =
-                      document.getElementById("wrapper-1");
+                    const wrapper = document.getElementById("wrapper-1");
 
-                    const img =
-                      wrapper?.querySelector("img.miniatura");
+                    const img = wrapper?.querySelector("img.miniatura");
 
                     if (!img) return;
 
-                    const eraAtiva =
-                      img.classList.contains("ativa");
+                    const eraAtiva = img.classList.contains("ativa");
 
                     img.remove();
 
-                    const input =
-                      document.getElementById(
-                        "input-1"
-                      ) as HTMLInputElement | null;
+                    const input = document.getElementById(
+                      "input-1",
+                    ) as HTMLInputElement | null;
 
                     if (input) input.value = "";
 
-                    const slot =
-                      document.createElement("div");
+                    const slot = document.createElement("div");
 
                     slot.className = "slotVazio";
                     slot.textContent = "+";
@@ -655,44 +817,39 @@ export default function RegistroAnimal() {
                     wrapper?.appendChild(slot);
 
                     if (eraAtiva) {
-                      const imagemGrande =
-                        document.getElementById(
-                          "imagemGrande"
-                        ) as HTMLImageElement | null;
+                      const imagemGrande = document.getElementById(
+                        "imagemGrande",
+                      ) as HTMLImageElement | null;
 
                       if (imagemGrande) {
                         imagemGrande.src = "";
+
                         imagemGrande.classList.remove("ativa");
 
                         const placeholder =
-                          document.getElementById(
-                            "placeHolderImagem"
-                          );
+                          document.getElementById("placeHolderImagem");
 
                         if (placeholder) {
                           placeholder.classList.remove("oculto");
                         }
                       }
 
-                      const outra =
-                        document.querySelector(
-                          "img.miniatura"
-                        ) as HTMLImageElement | null;
+                      const outra = document.querySelector(
+                        "img.miniatura",
+                      ) as HTMLImageElement | null;
 
                       if (outra) {
-                        const grande =
-                          document.getElementById(
-                            "imagemGrande"
-                          ) as HTMLImageElement | null;
+                        const grande = document.getElementById(
+                          "imagemGrande",
+                        ) as HTMLImageElement | null;
 
                         if (grande) {
                           grande.src = outra.src;
+
                           grande.classList.add("ativa");
 
                           const placeholder =
-                            document.getElementById(
-                              "placeHolderImagem"
-                            );
+                            document.getElementById("placeHolderImagem");
 
                           if (placeholder) {
                             placeholder.classList.add("oculto");
@@ -700,14 +857,8 @@ export default function RegistroAnimal() {
                         }
 
                         document
-                          .querySelectorAll(
-                            "img.miniatura"
-                          )
-                          .forEach((img) =>
-                            img.classList.remove(
-                              "ativa"
-                            )
-                          );
+                          .querySelectorAll("img.miniatura")
+                          .forEach((img) => img.classList.remove("ativa"));
 
                         outra.classList.add("ativa");
                       }
@@ -724,58 +875,42 @@ export default function RegistroAnimal() {
                 className="inputArquivo"
                 id="input-1"
                 onChange={(e) => {
-                  if (
-                    !e.target.files ||
-                    !e.target.files[0]
-                  )
-                    return;
+                  if (!e.target.files || !e.target.files[0]) return;
 
                   const reader = new FileReader();
 
                   reader.onload = (event) => {
-                    const wrapper =
-                      document.getElementById(
-                        "wrapper-1"
-                      );
+                    const wrapper = document.getElementById("wrapper-1");
 
                     if (!wrapper) return;
 
-                    const slotVazio =
-                      wrapper.querySelector(
-                        ".slotVazio"
-                      );
+                    const slotVazio = wrapper.querySelector(".slotVazio");
 
                     if (slotVazio) {
                       slotVazio.remove();
                     }
 
-                    let img =
-                      wrapper.querySelector(
-                        "img.miniatura"
-                      ) as HTMLImageElement | null;
+                    let img = wrapper.querySelector(
+                      "img.miniatura",
+                    ) as HTMLImageElement | null;
 
                     if (!img) {
-                      img =
-                        document.createElement("img");
+                      img = document.createElement("img");
 
-                      img.className =
-                        "miniatura";
+                      img.className = "miniatura";
 
                       img.onclick = function () {
-                        const imagemGrande =
-                          document.getElementById(
-                            "imagemGrande"
-                          ) as HTMLImageElement | null;
+                        const imagemGrande = document.getElementById(
+                          "imagemGrande",
+                        ) as HTMLImageElement | null;
 
                         if (imagemGrande) {
-                          imagemGrande.src =
-                            img!.src;
+                          imagemGrande.src = img!.src;
+
                           imagemGrande.classList.add("ativa");
 
                           const placeholder =
-                            document.getElementById(
-                              "placeHolderImagem"
-                            );
+                            document.getElementById("placeHolderImagem");
 
                           if (placeholder) {
                             placeholder.classList.add("oculto");
@@ -783,14 +918,8 @@ export default function RegistroAnimal() {
                         }
 
                         document
-                          .querySelectorAll(
-                            "img.miniatura"
-                          )
-                          .forEach((image) =>
-                            image.classList.remove(
-                              "ativa"
-                            )
-                          );
+                          .querySelectorAll("img.miniatura")
+                          .forEach((image) => image.classList.remove("ativa"));
 
                         img!.classList.add("ativa");
                       };
@@ -798,22 +927,19 @@ export default function RegistroAnimal() {
                       wrapper.appendChild(img);
                     }
 
-                    img.src =
-                      event.target?.result as string;
+                    img.src = event.target?.result as string;
 
-                    const imagemGrande =
-                      document.getElementById(
-                        "imagemGrande"
-                      ) as HTMLImageElement | null;
+                    const imagemGrande = document.getElementById(
+                      "imagemGrande",
+                    ) as HTMLImageElement | null;
 
                     if (imagemGrande) {
                       imagemGrande.src = img.src;
+
                       imagemGrande.classList.add("ativa");
 
                       const placeholder =
-                        document.getElementById(
-                          "placeHolderImagem"
-                        );
+                        document.getElementById("placeHolderImagem");
 
                       if (placeholder) {
                         placeholder.classList.add("oculto");
@@ -821,36 +947,27 @@ export default function RegistroAnimal() {
                     }
 
                     document
-                      .querySelectorAll(
-                        "img.miniatura"
-                      )
-                      .forEach((image) =>
-                        image.classList.remove(
-                          "ativa"
-                        )
-                      );
+                      .querySelectorAll("img.miniatura")
+                      .forEach((image) => image.classList.remove("ativa"));
 
                     img.classList.add("ativa");
                   };
 
-                  reader.readAsDataURL(
-                    e.target.files[0]
-                  );
+                  reader.readAsDataURL(e.target.files[0]);
                 }}
               />
 
               <div className="slotVazio">+</div>
             </div>
 
-            {/* Slot 3 */}
+            {/* slot 3*/}
+
             <div className="miniaturaWrapper" id="wrapper-2">
               <div className="miniaturaControles">
                 <button
                   className="btnMiniatura btnAdicionar"
                   title="Adicionar imagem"
-                  onClick={() =>
-                    document.getElementById("input-2")?.click()
-                  }
+                  onClick={() => document.getElementById("input-2")?.click()}
                 >
                   + Add
                 </button>
@@ -859,28 +976,23 @@ export default function RegistroAnimal() {
                   className="btnMiniatura btnApagar"
                   title="Apagar imagem"
                   onClick={() => {
-                    const wrapper =
-                      document.getElementById("wrapper-2");
+                    const wrapper = document.getElementById("wrapper-2");
 
-                    const img =
-                      wrapper?.querySelector("img.miniatura");
+                    const img = wrapper?.querySelector("img.miniatura");
 
                     if (!img) return;
 
-                    const eraAtiva =
-                      img.classList.contains("ativa");
+                    const eraAtiva = img.classList.contains("ativa");
 
                     img.remove();
 
-                    const input =
-                      document.getElementById(
-                        "input-2"
-                      ) as HTMLInputElement | null;
+                    const input = document.getElementById(
+                      "input-2",
+                    ) as HTMLInputElement | null;
 
                     if (input) input.value = "";
 
-                    const slot =
-                      document.createElement("div");
+                    const slot = document.createElement("div");
 
                     slot.className = "slotVazio";
                     slot.textContent = "+";
@@ -888,44 +1000,39 @@ export default function RegistroAnimal() {
                     wrapper?.appendChild(slot);
 
                     if (eraAtiva) {
-                      const imagemGrande =
-                        document.getElementById(
-                          "imagemGrande"
-                        ) as HTMLImageElement | null;
+                      const imagemGrande = document.getElementById(
+                        "imagemGrande",
+                      ) as HTMLImageElement | null;
 
                       if (imagemGrande) {
                         imagemGrande.src = "";
+
                         imagemGrande.classList.remove("ativa");
 
                         const placeholder =
-                          document.getElementById(
-                            "placeHolderImagem"
-                          );
+                          document.getElementById("placeHolderImagem");
 
                         if (placeholder) {
                           placeholder.classList.remove("oculto");
                         }
                       }
 
-                      const outra =
-                        document.querySelector(
-                          "img.miniatura"
-                        ) as HTMLImageElement | null;
+                      const outra = document.querySelector(
+                        "img.miniatura",
+                      ) as HTMLImageElement | null;
 
                       if (outra) {
-                        const grande =
-                          document.getElementById(
-                            "imagemGrande"
-                          ) as HTMLImageElement | null;
+                        const grande = document.getElementById(
+                          "imagemGrande",
+                        ) as HTMLImageElement | null;
 
                         if (grande) {
                           grande.src = outra.src;
+
                           grande.classList.add("ativa");
 
                           const placeholder =
-                            document.getElementById(
-                              "placeHolderImagem"
-                            );
+                            document.getElementById("placeHolderImagem");
 
                           if (placeholder) {
                             placeholder.classList.add("oculto");
@@ -933,14 +1040,8 @@ export default function RegistroAnimal() {
                         }
 
                         document
-                          .querySelectorAll(
-                            "img.miniatura"
-                          )
-                          .forEach((img) =>
-                            img.classList.remove(
-                              "ativa"
-                            )
-                          );
+                          .querySelectorAll("img.miniatura")
+                          .forEach((img) => img.classList.remove("ativa"));
 
                         outra.classList.add("ativa");
                       }
@@ -957,58 +1058,42 @@ export default function RegistroAnimal() {
                 className="inputArquivo"
                 id="input-2"
                 onChange={(e) => {
-                  if (
-                    !e.target.files ||
-                    !e.target.files[0]
-                  )
-                    return;
+                  if (!e.target.files || !e.target.files[0]) return;
 
                   const reader = new FileReader();
 
                   reader.onload = (event) => {
-                    const wrapper =
-                      document.getElementById(
-                        "wrapper-2"
-                      );
+                    const wrapper = document.getElementById("wrapper-2");
 
                     if (!wrapper) return;
 
-                    const slotVazio =
-                      wrapper.querySelector(
-                        ".slotVazio"
-                      );
+                    const slotVazio = wrapper.querySelector(".slotVazio");
 
                     if (slotVazio) {
                       slotVazio.remove();
                     }
 
-                    let img =
-                      wrapper.querySelector(
-                        "img.miniatura"
-                      ) as HTMLImageElement | null;
+                    let img = wrapper.querySelector(
+                      "img.miniatura",
+                    ) as HTMLImageElement | null;
 
                     if (!img) {
-                      img =
-                        document.createElement("img");
+                      img = document.createElement("img");
 
-                      img.className =
-                        "miniatura";
+                      img.className = "miniatura";
 
                       img.onclick = function () {
-                        const imagemGrande =
-                          document.getElementById(
-                            "imagemGrande"
-                          ) as HTMLImageElement | null;
+                        const imagemGrande = document.getElementById(
+                          "imagemGrande",
+                        ) as HTMLImageElement | null;
 
                         if (imagemGrande) {
-                          imagemGrande.src =
-                            img!.src;
+                          imagemGrande.src = img!.src;
+
                           imagemGrande.classList.add("ativa");
 
                           const placeholder =
-                            document.getElementById(
-                              "placeHolderImagem"
-                            );
+                            document.getElementById("placeHolderImagem");
 
                           if (placeholder) {
                             placeholder.classList.add("oculto");
@@ -1016,14 +1101,8 @@ export default function RegistroAnimal() {
                         }
 
                         document
-                          .querySelectorAll(
-                            "img.miniatura"
-                          )
-                          .forEach((image) =>
-                            image.classList.remove(
-                              "ativa"
-                            )
-                          );
+                          .querySelectorAll("img.miniatura")
+                          .forEach((image) => image.classList.remove("ativa"));
 
                         img!.classList.add("ativa");
                       };
@@ -1031,22 +1110,19 @@ export default function RegistroAnimal() {
                       wrapper.appendChild(img);
                     }
 
-                    img.src =
-                      event.target?.result as string;
+                    img.src = event.target?.result as string;
 
-                    const imagemGrande =
-                      document.getElementById(
-                        "imagemGrande"
-                      ) as HTMLImageElement | null;
+                    const imagemGrande = document.getElementById(
+                      "imagemGrande",
+                    ) as HTMLImageElement | null;
 
                     if (imagemGrande) {
                       imagemGrande.src = img.src;
+
                       imagemGrande.classList.add("ativa");
 
                       const placeholder =
-                        document.getElementById(
-                          "placeHolderImagem"
-                        );
+                        document.getElementById("placeHolderImagem");
 
                       if (placeholder) {
                         placeholder.classList.add("oculto");
@@ -1054,29 +1130,22 @@ export default function RegistroAnimal() {
                     }
 
                     document
-                      .querySelectorAll(
-                        "img.miniatura"
-                      )
-                      .forEach((image) =>
-                        image.classList.remove(
-                          "ativa"
-                        )
-                      );
+                      .querySelectorAll("img.miniatura")
+                      .forEach((image) => image.classList.remove("ativa"));
 
                     img.classList.add("ativa");
                   };
 
-                  reader.readAsDataURL(
-                    e.target.files[0]
-                  );
+                  reader.readAsDataURL(e.target.files[0]);
                 }}
               />
 
               <div className="slotVazio">+</div>
             </div>
-
           </div>
         </div>
+
+        {/* descrição */}
 
         <div className="contDescricaoAnimal">
           <div id="descricaoAnimal">
@@ -1089,11 +1158,13 @@ export default function RegistroAnimal() {
             <textarea placeholder="Descreva o animal aqui"></textarea>
           </div>
 
+          {/* cards */}
+
           <div className="containerCard">
             <div className="cardBoxEsquerdo">
-
               <div className="infoCard1">
                 <label htmlFor="raca">Raça</label>
+
                 <input
                   id="raca"
                   type="text"
@@ -1104,58 +1175,61 @@ export default function RegistroAnimal() {
 
               <div className="infoCard1">
                 <label htmlFor="idade">Idade</label>
+
                 <select id="idade" defaultValue="">
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  <option value="filhote">
-                    Filhote
-                  </option>
-                  <option value="adulto">
-                    Adulto
-                  </option>
-                  <option value="idoso">
-                    Idoso
-                  </option>
+
+                  <option value="FILHOTE">Filhote</option>
+
+                  <option value="ADULTO">Adulto</option>
+
+                  <option value="IDOSO">Idoso</option>
                 </select>
               </div>
 
               <div className="infoCard1">
-                <label htmlFor="localizacao">
-                  Tipo de animal
-                </label>
+                <label htmlFor="especie">Tipo de animal</label>
 
-                <select id="localizacao" defaultValue="">
+                <select id="especie" defaultValue="">
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  <option value="cachorro">
-                    Cachorro
-                  </option>
-                  <option value="gato">
-                    Gato
-                  </option>
+
+                  <option value="CACHORRO">Cachorro</option>
+
+                  <option value="GATO">Gato</option>
                 </select>
               </div>
 
               <div className="infoCard1">
-                <label htmlFor="microchip">
-                  Possui Microchip?
-                </label>
+                <label htmlFor="microchip">Possui Microchip?</label>
 
                 <select id="microchip" defaultValue="">
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
+
                   <option value="sim">Sim</option>
+
                   <option value="nao">Não</option>
                 </select>
               </div>
 
+              <div className="infoCard1">
+                <label htmlFor="localizacao">Localização</label>
+
+                <input
+                  id="localizacao"
+                  type="text"
+                  placeholder="Ex: Londrina - PR"
+                  defaultValue=""
+                />
+              </div>
             </div>
 
             <div className="cardBoxDireito">
-
               <div className="infoCard2">
                 <label htmlFor="sexo">Sexo</label>
 
@@ -1163,33 +1237,26 @@ export default function RegistroAnimal() {
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  <option value="masculino">
-                    Macho
-                  </option>
-                  <option value="feminino">
-                    Fêmea
-                  </option>
+
+                  <option value="masculino">Macho</option>
+
+                  <option value="feminino">Fêmea</option>
                 </select>
               </div>
 
               <div className="infoCard2">
-                <label htmlFor="porte">
-                  Porte do animal
-                </label>
+                <label htmlFor="porte">Porte do animal</label>
 
                 <select id="porte" defaultValue="">
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
-                  <option value="pequeno">
-                    Pequeno
-                  </option>
-                  <option value="medio">
-                    Médio
-                  </option>
-                  <option value="grande">
-                    Grande
-                  </option>
+
+                  <option value="PEQUENO">Pequeno</option>
+
+                  <option value="MEDIO">Médio</option>
+
+                  <option value="GRANDE">Grande</option>
                 </select>
               </div>
 
@@ -1205,23 +1272,22 @@ export default function RegistroAnimal() {
               </div>
 
               <div className="infoCard2">
-                <label htmlFor="vacinado">
-                  Vacinado?
-                </label>
+                <label htmlFor="vacinado">Vacinado?</label>
 
                 <select id="vacinado" defaultValue="">
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
+
                   <option value="sim">Sim</option>
+
                   <option value="nao">Não</option>
                 </select>
               </div>
-
             </div>
           </div>
 
-          <button id="botaoAzul" type="button">
+          <button id="botaoAzul" type="button" onClick={cadastrarAnimal}>
             Confirmar Registro
           </button>
         </div>

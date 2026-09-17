@@ -9,7 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AnimalUpdateDTO {
-    private long id;
     private String nome;
     private String raca;
     private Idade idade;
@@ -17,19 +16,12 @@ public class AnimalUpdateDTO {
     private String comportamento;
     private String fotos;
     private Boolean possuiChip;
-    private String localizacao;
+    private Long cidadeId;
     private Boolean vacinado;
     private String cor;
 
-    @Enumerated(EnumType.STRING)
     private Especie especie;
-
-    @Enumerated(EnumType.STRING)
     private Porte porte;
-
-    @Enumerated(EnumType.STRING)
     private Sexo sexo;
-
-    @Enumerated(EnumType.STRING)
     private Status status;
 }

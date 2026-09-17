@@ -1,5 +1,6 @@
 package com.extensao.adotapet.Animal;
 
+import com.extensao.adotapet.localizacao.Cidade;
 import com.extensao.adotapet.Enum.*;
 import com.extensao.adotapet.Usuario.Usuario;
 import jakarta.persistence.*;
@@ -35,11 +36,14 @@ public class Animal {
     @Lob
     private String fotos;
 
-
-    //Usuario responsável
+    //usuário responsável
     @ManyToOne
-    @JoinColumn(name = "usuario_id", nullable = false)
+    @JoinColumn(name = "usuario_id", nullable=false)
     private Usuario ong;
+
+    @ManyToOne
+    @JoinColumn(name = "cidade_id")
+    private Cidade cidade;
 
     @Enumerated(EnumType.STRING)
     private Especie especie;
@@ -61,7 +65,7 @@ public class Animal {
         this.comportamento = data.comportamento();
         this.fotos = data.fotos();
         this.possuiChip = data.possuiChip();
-        this.localizacao = data.localizacao();
+
         this.vacinado = data.vacinado();
         this.especie = data.especie();
         this.porte = data.porte();

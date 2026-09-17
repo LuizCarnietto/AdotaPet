@@ -22,6 +22,24 @@ interface AnimalType {
   local: string;
 }
 
+const obterFoto = (fotos: string | null | undefined): string => {
+  if (!fotos) {
+    return "";
+  }
+
+  try {
+    const fotosParseadas = JSON.parse(fotos);
+
+    if (Array.isArray(fotosParseadas)) {
+      return fotosParseadas[0] || "";
+    }
+
+    return "";
+  } catch {
+    return fotos;
+  }
+};
+
 // const ListarAnimais = () => {
 // const animal: AnimalType[] = [
 // {
@@ -99,6 +117,7 @@ const ListarAnimais = () => {
 
   const buscarAnimais = async () => {
     console.log("Aplicando filtros...");
+
     try {
       const payload = {
         especie: filtro.especie || null,
@@ -122,10 +141,8 @@ const ListarAnimais = () => {
 
       setAnimais(
         response.data.map((pet: any) => {
-          const fotos = pet.fotos ? JSON.parse(pet.fotos) : [];
-
           return {
-            img: fotos[0] || "",
+            img: obterFoto(pet.fotos),
             name: pet.nome,
             gender: pet.sexo,
             porte: pet.porte,
@@ -145,18 +162,17 @@ const ListarAnimais = () => {
 
         console.log(response.data);
         console.log("ANIMAIS RAW:", response.data);
-        console.log(
-          "MAPPED:",
-          response.data.map((pet: any) => pet.nome),
-        );
+
         setAnimais(
-          response.data.map((pet: any) => ({
-            img: pet.fotos,
-            name: pet.nome,
-            gender: pet.sexo,
-            porte: pet.porte,
-            local: pet.localizacao,
-          })),
+          response.data.map((pet: any) => {
+            return {
+              img: obterFoto(pet.fotos),
+              name: pet.nome,
+              gender: pet.sexo,
+              porte: pet.porte,
+              local: pet.localizacao,
+            };
+          }),
         );
       } catch (error) {
         console.error("Erro ao buscar animais", error);
