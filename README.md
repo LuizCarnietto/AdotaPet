@@ -82,9 +82,17 @@ Antes de rodar o projeto, tenha instalado:
    ```
 
 3. Execute a aplicação:
-   ```bash
-   [comando usado para rodar o backend]
    ```
+   AdotaPet-back-end/
+   └── src/
+    └── main/
+        └── java/
+            └── com/
+                └── extensao/
+                    └── adotapet/
+                        └── AdotapetApplication.java
+   ```
+   Executa a aplicação dentro do arquivo AdotapetApplication.java dentro de seu compilador.
 
 4. A API estará disponível em `http://localhost:8080`.
 
