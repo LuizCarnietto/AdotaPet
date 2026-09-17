@@ -232,13 +232,9 @@ public class AnimalService {
             );
         }
 
-        if (filtro.localizacao() != null &&
-                !filtro.localizacao().isBlank()) {
-
+        if (filtro.cidadeId() != null) {
             spec = spec.and(
-                    AnimalSpecification.localizacao(
-                            filtro.localizacao()
-                    )
+                    AnimalSpecification.cidade(filtro.cidadeId())
             );
         }
 

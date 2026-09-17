@@ -40,68 +40,20 @@ const obterFoto = (fotos: string | null | undefined): string => {
   }
 };
 
-// const ListarAnimais = () => {
-// const animal: AnimalType[] = [
-// {
-//   img: "https://static.wixstatic.com/media/a87918_a1d2656045414ee9989e64213b252b37~mv2_d_4368_2912_s_4_2.jpg/v1/fill/w_568,h_378,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/a87918_a1d2656045414ee9989e64213b252b37~mv2_d_4368_2912_s_4_2.jpg",
-//   name: "Max",
-//   gender: "Macho",
-//   porte: "Grande",
-//   local: "São Paulo - SP",
-// },
-// {
-//   img: "https://premierpet.com.br/wp-content/uploads/2023/12/model-banner-siames-mobile-v1.png",
-//   name: "Luna",
-//   gender: "Fêmea",
-//   porte: "Médio",
-//   local: "Rio de Janeiro - RJ",
-// },
-// {
-//   img: "https://i0.statig.com.br/bancodeimagens/2f/ym/i8/2fymi85z5vo5pcl5rsnsr3xgi.jpg",
-//   name: "Caramelo",
-//   gender: "Macho",
-//   porte: "Médio",
-//   local: "Belo Horizonte - MG",
-// },
-// {
-//   img: "https://vetex.vet.br/blog/wp-content/uploads/2021/12/gato-persa.png",
-//   name: "Pérola",
-//   gender: "Fêmea",
-//   porte: "Pequeno",
-//   local: "Curitiba - PR",
-// },
-// {
-//   img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTQ1ueQF0YfuNZeWi4wHz_wMl5YlZFovPaLdQ&s",
-//   name: "Buddy",
-//   gender: "Macho",
-//   porte: "Grande",
-//   local: "Porto Alegre - RS",
-// },
-// {
-//   img: "https://blog-static.petlove.com.br/wp-content/uploads/2022/05/gato-preto-deitado-Petlove.jpg",
-//   name: "Sombra",
-//   gender: "Fêmea",
-//   porte: "Médio",
-//   local: "Salvador - BA",
-// },
-// {
-//   img: "https://upload.wikimedia.org/wikipedia/commons/b/b3/Mops_oct09_cropped.jpg",
-//   name: "Thor",
-//   gender: "Macho",
-//   porte: "Pequeno",
-//   local: "Brasília - DF",
-// },
-// {
-//   img: "https://petanjo.com/blog/wp-content/uploads/2021/07/maine-coon.jpg",
-//   name: "Nala",
-//   gender: "Fêmea",
-//   porte: "Grande",
-//   local: "Florianópolis - SC",
-// },
-// ];
-
 const ListarAnimais = () => {
   const [animais, setAnimais] = useState<AnimalType[]>([]);
+
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const animaisPorPagina = 16;
+
+  const [estados, setEstados] = useState<any[]>([]);
+  const [cidades, setCidades] = useState<any[]>([]);
+  const [estadoId, setEstadoId] = useState("");
+  const [cidadeId, setCidadeId] = useState("");
+  const [racaTexto, setRacaTexto] = useState("");
+  const [racaId, setRacaId] = useState("");
+  const [racasSugestoes, setRacasSugestoes] = useState<any[]>([]);
+  const [buscandoRacas, setBuscandoRacas] = useState(false);
 
   const [filtro, setFiltro] = useState({
     especie: "",
@@ -116,19 +68,20 @@ const ListarAnimais = () => {
   });
 
   const buscarAnimais = async () => {
+    setPaginaAtual(1);
     console.log("Aplicando filtros...");
 
     try {
       const payload = {
         especie: filtro.especie || null,
-        raca: filtro.raca || null,
+        raca: racaTexto || null,
         sexo: filtro.sexo || null,
         cor: filtro.cor || null,
         idade: filtro.idade || null,
         porte: filtro.porte || null,
         possuiChip:
           filtro.possuiChip === "" ? null : filtro.possuiChip === "true",
-        localizacao: filtro.localizacao || null,
+        cidadeId: cidadeId ? Number(cidadeId) : null,
         vacinado: filtro.vacinado === "" ? null : filtro.vacinado === "true",
       };
 
@@ -146,7 +99,10 @@ const ListarAnimais = () => {
             name: pet.nome,
             gender: pet.sexo,
             porte: pet.porte,
-            local: pet.localizacao,
+            local:
+              pet.cidade && pet.estadoSigla
+                ? `${pet.cidade} - ${pet.estadoSigla}`
+                : pet.cidade || pet.localizacao || "Não informado",
           };
         }),
       );
@@ -155,32 +111,135 @@ const ListarAnimais = () => {
     }
   };
 
+  const resetarFiltros = () => {
+    setPaginaAtual(1);
+    setFiltro({
+      especie: "",
+      raca: "",
+      sexo: "",
+      cor: "",
+      idade: "",
+      porte: "",
+      possuiChip: "",
+      localizacao: "",
+      vacinado: "",
+    });
+
+    setEstadoId("");
+    setCidadeId("");
+
+    setRacaTexto("");
+    setRacaId("");
+    setRacasSugestoes([]);
+
+    buscarTodosAnimais();
+  };
+
+  const buscarTodosAnimais = async () => {
+    try {
+      const response = await apiService.get("/animal");
+
+      console.log("ANIMAIS RAW:", response.data);
+
+      setAnimais(
+        response.data.map((pet: any) => {
+          return {
+            img: obterFoto(pet.fotos),
+            name: pet.nome,
+            gender: pet.sexo,
+            porte: pet.porte,
+            local:
+              pet.cidade && pet.estadoSigla
+                ? `${pet.cidade} - ${pet.estadoSigla}`
+                : pet.cidade || pet.localizacao || "Não informado",
+          };
+        }),
+      );
+    } catch (error) {
+      console.error("Erro ao buscar animais", error);
+    }
+  };
+
   useEffect(() => {
-    const fetchAnimais = async () => {
+    const buscarEstados = async () => {
       try {
-        const response = await apiService.get("/animal");
-
-        console.log(response.data);
-        console.log("ANIMAIS RAW:", response.data);
-
-        setAnimais(
-          response.data.map((pet: any) => {
-            return {
-              img: obterFoto(pet.fotos),
-              name: pet.nome,
-              gender: pet.sexo,
-              porte: pet.porte,
-              local: pet.localizacao,
-            };
-          }),
-        );
+        const response = await apiService.get("/localizacao/estados");
+        setEstados(response.data);
       } catch (error) {
-        console.error("Erro ao buscar animais", error);
+        console.error("Erro ao buscar estados:", error);
       }
     };
 
-    fetchAnimais();
+    buscarEstados();
   }, []);
+
+  useEffect(() => {
+    const buscarCidades = async () => {
+      if (!estadoId) {
+        setCidades([]);
+        setCidadeId("");
+        return;
+      }
+
+      try {
+        const response = await apiService.get(
+          `/localizacao/cidades/${estadoId}`,
+        );
+
+        setCidades(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar cidades:", error);
+        setCidades([]);
+      }
+    };
+
+    buscarCidades();
+  }, [estadoId]);
+
+  // Autocomplete de raças
+  useEffect(() => {
+    if (!filtro.especie) {
+      setRacasSugestoes([]);
+      return;
+    }
+
+    const buscarRacas = async () => {
+      try {
+        setBuscandoRacas(true);
+
+        const response = await apiService.get(
+          `/racas/${filtro.especie}/buscar`,
+          {
+            params: {
+              nome: racaTexto.trim(),
+            },
+          },
+        );
+
+        setRacasSugestoes(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar raças:", error);
+        setRacasSugestoes([]);
+      } finally {
+        setBuscandoRacas(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      buscarRacas();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [racaTexto, filtro.especie]);
+
+  useEffect(() => {
+    buscarTodosAnimais();
+  }, []);
+
+  const indiceInicial = (paginaAtual - 1) * animaisPorPagina;
+  const indiceFinal = indiceInicial + animaisPorPagina;
+  const animaisDaPagina = animais.slice(indiceInicial, indiceFinal);
+  const totalPaginas = Math.ceil(animais.length / animaisPorPagina);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans w-full">
@@ -188,21 +247,28 @@ const ListarAnimais = () => {
         <aside className="w-full md:w-1/4 space-y-6">
           <div className="mb-6">
             <h1 className="text-[#36C3FF] text-2xl font-normal m-0">Filtros</h1>
+
             <p className="text-[#7085a0] text-sm mt-1">Refine sua busca</p>
           </div>
 
           <div className="space-y-4">
+            {/* ESPÉCIE */}
             <FilterCard label="Especie do animal">
               <Select
                 value={filtro.especie}
-                onValueChange={(value) =>
+                onValueChange={(value) => {
                   setFiltro((prev) => ({
                     ...prev,
                     especie: value === "todos" ? "" : value,
-                  }))
-                }
+                    raca: "",
+                  }));
+
+                  setRacaTexto("");
+                  setRacaId("");
+                  setRacasSugestoes([]);
+                }}
               >
-                <SelectTrigger className="border-none focus:ring-0">
+                <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
 
@@ -213,19 +279,54 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            <FilterCard label="Raça">
-              <Input
-                placeholder="Digite a raça"
-                value={filtro.raca}
-                onChange={(e) =>
-                  setFiltro((prev) => ({
-                    ...prev,
-                    raca: e.target.value,
-                  }))
-                }
-              />
-            </FilterCard>
+            {/* RAÇA */}
+            <div className="relative z-50">
+              <FilterCard label="Raça">
+                <div className="racaAutocomplete relative w-full">
+                  <Input
+                    placeholder={
+                      filtro.especie
+                        ? "Digite a raça"
+                        : "Selecione primeiro a espécie"
+                    }
+                    value={racaTexto}
+                    onChange={(e) => {
+                      setRacaTexto(e.target.value);
+                      setRacaId("");
+                    }}
+                    autoComplete="off"
+                    disabled={!filtro.especie}
+                    className="h-[38px] w-full rounded-[10px] border border-[#dce3ea] bg-[#f9fbfd] px-3 text-left text-[13px] outline-none transition-all placeholder:text-[#9aa6af] focus:border-[#36C3FF] focus:bg-white focus:ring-2 focus:ring-[#36C3FF]/20 disabled:cursor-not-allowed disabled:bg-[#eef2f5] disabled:text-[#8a969f] disabled:opacity-70"
+                  />
 
+                  {racasSugestoes.length > 0 && (
+                    <div className="racaSugestoes absolute left-0 top-[42px] z-[1000] max-h-[180px] w-full overflow-y-auto rounded-[10px] border border-[#dce3ea] bg-white p-1 shadow-[0_5px_15px_rgba(0,0,0,0.10)]">
+                      {racasSugestoes.map((raca) => (
+                        <div
+                          key={raca.id}
+                          className="racaSugestao cursor-pointer rounded-[7px] px-3 py-2 text-left text-[13px] transition-colors hover:bg-[#eef9ff] hover:text-[#159edb]"
+                          onClick={() => {
+                            setRacaTexto(raca.nome);
+                            setRacaId(String(raca.id));
+                            setRacasSugestoes([]);
+                          }}
+                        >
+                          {raca.nome}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {buscandoRacas && (
+                    <div className="racaBuscando absolute left-0 top-[42px] z-[1000] w-full rounded-[10px] border border-[#dce3ea] bg-white px-3 py-2 text-[12px] text-[#8a969f] shadow-[0_5px_15px_rgba(0,0,0,0.10)]">
+                      Buscando...
+                    </div>
+                  )}
+                </div>
+              </FilterCard>
+            </div>
+
+            {/* SEXO */}
             <FilterCard label="Sexo">
               <Select
                 value={filtro.sexo}
@@ -236,9 +337,10 @@ const ListarAnimais = () => {
                   }))
                 }
               >
-                <SelectTrigger className="border-none focus:ring-0">
+                <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="MACHO">Macho</SelectItem>
                   <SelectItem value="FEMEA">Fêmea</SelectItem>
@@ -246,6 +348,7 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
+            {/* COR */}
             <FilterCard label="Cor">
               <Select
                 value={filtro.cor}
@@ -256,9 +359,10 @@ const ListarAnimais = () => {
                   }))
                 }
               >
-                <SelectTrigger className="border-none focus:ring-0">
+                <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="BRANCO">Branco</SelectItem>
                   <SelectItem value="PRETO">Preto</SelectItem>
@@ -271,6 +375,7 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
+            {/* IDADE */}
             <FilterCard label="Idade">
               <Select
                 value={filtro.idade}
@@ -281,9 +386,10 @@ const ListarAnimais = () => {
                   }))
                 }
               >
-                <SelectTrigger className="border-none focus:ring-0">
+                <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="FILHOTE">Filhote</SelectItem>
                   <SelectItem value="ADULTO">Adulto</SelectItem>
@@ -292,6 +398,7 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
+            {/* PORTE */}
             <FilterCard label="Porte do animal">
               <Select
                 value={filtro.porte}
@@ -302,9 +409,10 @@ const ListarAnimais = () => {
                   }))
                 }
               >
-                <SelectTrigger className="border-none focus:ring-0">
+                <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="PEQUENO">Pequeno</SelectItem>
                   <SelectItem value="MEDIO">Médio</SelectItem>
@@ -313,6 +421,7 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
+            {/* MICROCHIP */}
             <FilterCard label="Possui Microchip?">
               <Select
                 value={filtro.possuiChip}
@@ -323,9 +432,10 @@ const ListarAnimais = () => {
                   }))
                 }
               >
-                <SelectTrigger className="border-none focus:ring-0">
+                <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="true">Sim</SelectItem>
                   <SelectItem value="false">Não</SelectItem>
@@ -333,19 +443,52 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
+            {/* LOCALIZAÇÃO */}
             <FilterCard label="Localização">
-              <Input
-                placeholder="Digite a localização"
-                value={filtro.localizacao}
-                onChange={(e) =>
-                  setFiltro((prev) => ({
-                    ...prev,
-                    localizacao: e.target.value,
-                  }))
-                }
-              />
+              <div className="flex gap-2 w-full">
+                <Select
+                  value={estadoId}
+                  onValueChange={(value) => {
+                    setEstadoId(value);
+                    setCidadeId("");
+                  }}
+                >
+                  <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
+                    <SelectValue placeholder="Estado" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {estados.map((estado) => (
+                      <SelectItem key={estado.id} value={String(estado.id)}>
+                        {estado.sigla}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={cidadeId}
+                  onValueChange={(value) => {
+                    setCidadeId(value);
+                  }}
+                  disabled={!estadoId}
+                >
+                  <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20 disabled:bg-[#eef2f5] disabled:text-[#8a969f]">
+                    <SelectValue placeholder="Cidade" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {cidades.map((cidade) => (
+                      <SelectItem key={cidade.id} value={String(cidade.id)}>
+                        {cidade.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </FilterCard>
 
+            {/* VACINADO */}
             <FilterCard label="Vacinado">
               <Select
                 value={filtro.vacinado}
@@ -356,9 +499,10 @@ const ListarAnimais = () => {
                   }))
                 }
               >
-                <SelectTrigger className="border-none focus:ring-0 ">
+                <SelectTrigger className="border border-[#dce3ea] rounded-[10px] focus:ring-2 focus:ring-[#36C3FF]/20">
                   <SelectValue placeholder="Todos" />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="true">Sim</SelectItem>
@@ -367,18 +511,28 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            <Button
-              className="w-full bg-[#36C3FF] hover:bg-[#2db0e8] text-white rounded-[30px] py-6"
-              onClick={buscarAnimais}
-            >
-              Aplicar Filtros
-            </Button>
+            {/* BOTÕES */}
+            <div className="flex w-full gap-2">
+              <Button
+                className="h-[48px] flex-1 rounded-[30px] bg-[#36C3FF] px-3 text-[14px] text-white hover:bg-[#2db0e8]"
+                onClick={buscarAnimais}
+              >
+                Aplicar Filtros
+              </Button>
+
+              <Button
+                className="h-[48px] flex-1 rounded-[30px] bg-[#36C3FF] px-3 text-[14px] text-white hover:bg-[#2db0e8]"
+                onClick={resetarFiltros}
+              >
+                Resetar Filtros
+              </Button>
+            </div>
           </div>
         </aside>
 
         <section className="flex-1 bg-violet-200/30 rounded-3xl p-6 min-h-[600px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {animais.map((pet, index) => (
+            {animaisDaPagina.map((pet, index) => (
               <div
                 key={index}
                 className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200"
@@ -401,12 +555,14 @@ const ListarAnimais = () => {
                       </span>{" "}
                       {pet.gender}
                     </p>
+
                     <p>
                       <span className="font-semibold text-gray-800">
                         Porte:
                       </span>{" "}
                       {pet.porte}
                     </p>
+
                     <p>
                       <span className="font-semibold text-gray-800">
                         Local:
@@ -418,13 +574,52 @@ const ListarAnimais = () => {
               </div>
             ))}
           </div>
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <Button
+                variant="outline"
+                disabled={paginaAtual === 1}
+                onClick={() => setPaginaAtual((pagina) => pagina - 1)}
+                className="rounded-[20px]"
+              >
+                Anterior
+              </Button>
+
+              {Array.from({ length: totalPaginas }, (_, index) => {
+                const pagina = index + 1;
+
+                return (
+                  <Button
+                    key={pagina}
+                    onClick={() => setPaginaAtual(pagina)}
+                    className={`rounded-[20px] w-10 h-10 ${
+                      paginaAtual === pagina
+                        ? "bg-[#36C3FF] hover:bg-[#2db0e8] text-white"
+                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-100"
+                    }`}
+                  >
+                    {pagina}
+                  </Button>
+                );
+              })}
+
+              <Button
+                variant="outline"
+                disabled={paginaAtual === totalPaginas}
+                onClick={() => setPaginaAtual((pagina) => pagina + 1)}
+                className="rounded-[20px]"
+              >
+                Próxima
+              </Button>
+            </div>
+          )}
         </section>
       </main>
     </div>
   );
 };
 
-// Componente auxiliar para os cards de filtro para manter o código limpo
+// Componente auxiliar para os cards de filtro
 const FilterCard = ({
   label,
   children,
@@ -432,8 +627,9 @@ const FilterCard = ({
   label: string;
   children: React.ReactNode;
 }) => (
-  <Card className="p-4 rounded-[30px] border-none shadow-sm flex flex-row items-center">
-    <Label className="text-[#7085a0] text-[16px] mb-2 block ">{label}</Label>
+  <Card className="p-4 rounded-[30px] border-none shadow-sm flex flex-row items-center overflow-visible">
+    <Label className="text-[#7085a0] text-[16px] mb-2 block">{label}</Label>
+
     {children}
   </Card>
 );

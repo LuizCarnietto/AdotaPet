@@ -10,6 +10,6 @@ public record AnimalFiltroDTO(
         Idade idade,
         Porte porte,
         Boolean possuiChip,
-        String localizacao,
+        Long cidadeId,
         Boolean vacinado
 ) {}

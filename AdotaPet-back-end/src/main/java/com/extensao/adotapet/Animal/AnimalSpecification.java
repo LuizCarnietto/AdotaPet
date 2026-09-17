@@ -17,8 +17,10 @@ public class AnimalSpecification {
 
     public static Specification<Animal> raca(String raca) {
         return (root, query, cb) ->
-                cb.like(cb.lower(root.get("raca")),
-                        "%" + raca.toLowerCase() + "%");
+                cb.like(
+                        cb.lower(root.get("raca").get("nome")),
+                        "%" + raca.toLowerCase() + "%"
+                );
     }
 
     public static Specification<Animal> sexo(Sexo sexo) {
@@ -52,9 +54,10 @@ public class AnimalSpecification {
                 cb.equal(root.get("vacinado"), vacinado);
     }
 
-    public static Specification<Animal> localizacao(String localizacao) {
+
+
+    public static Specification<Animal> cidade(Long cidadeId) {
         return (root, query, cb) ->
-                cb.like(cb.lower(root.get("localizacao")),
-                        "%" + localizacao.toLowerCase() + "%");
+                cb.equal(root.get("cidade").get("id"), cidadeId);
     }
 }
