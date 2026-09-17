@@ -3,6 +3,7 @@ package com.extensao.adotapet.Animal;
 import com.extensao.adotapet.Enum.*;
 import com.extensao.adotapet.Usuario.Usuario;
 import jakarta.persistence.*;
+import jakarta.persistence.Lob;
 import lombok.*;
 
 @Table(name = "animal")
@@ -26,14 +27,16 @@ public class Animal {
 
     private String historicoSaude;
     private String comportamento;
-    private String fotos;
     private boolean possuiChip;
     private String localizacao;
     private boolean vacinado;
     private String cor;
 
+    @Lob
+    private String fotos;
 
-    //USUARIO RESPONSAVEL
+
+    //Usuario responsável
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario ong;

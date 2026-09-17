@@ -17,8 +17,8 @@ import { apiService } from "@/services/ApiService";
 interface AnimalType {
   img: string;
   name: string;
-  gender: "Macho" | "Fêmea";
-  porte: "Pequeno" | "Médio" | "Grande";
+  gender: string;
+  porte: string;
   local: string;
 }
 
@@ -121,13 +121,17 @@ const ListarAnimais = () => {
       console.log("Resposta:", response.data);
 
       setAnimais(
-        response.data.map((pet: any) => ({
-          img: pet.fotos,
-          name: pet.nome,
-          gender: pet.sexo,
-          porte: pet.porte,
-          local: pet.localizacao,
-        })),
+        response.data.map((pet: any) => {
+          const fotos = pet.fotos ? JSON.parse(pet.fotos) : [];
+
+          return {
+            img: fotos[0] || "",
+            name: pet.nome,
+            gender: pet.sexo,
+            porte: pet.porte,
+            local: pet.localizacao,
+          };
+        }),
       );
     } catch (error) {
       console.error("Erro completo:", error);
@@ -194,22 +198,16 @@ const ListarAnimais = () => {
             </FilterCard>
 
             <FilterCard label="Raça">
-              <Select
-                value={filtro.sexo}
-                onValueChange={(value) =>
+              <Input
+                placeholder="Digite a raça"
+                value={filtro.raca}
+                onChange={(e) =>
                   setFiltro((prev) => ({
                     ...prev,
-                    sexo: value === "todos" ? "" : value,
+                    raca: e.target.value,
                   }))
                 }
-              >
-                <SelectTrigger className="border-none focus:ring-0">
-                  <SelectValue placeholder="Todas" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todas">Todas</SelectItem>
-                </SelectContent>
-              </Select>
+              />
             </FilterCard>
 
             <FilterCard label="Sexo">

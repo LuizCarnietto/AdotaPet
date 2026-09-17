@@ -1,19 +1,13 @@
 package com.extensao.adotapet.Animal;
 
-import com.extensao.adotapet.Enum.Status;
-import com.extensao.adotapet.Enum.TipoUsuario;
+import com.extensao.adotapet.Usuario.TipoUsuario;
 import com.extensao.adotapet.Usuario.Usuario;
 import com.extensao.adotapet.Usuario.UsuarioRepository;
-import com.extensao.adotapet.Utils.Util;
-import com.extensao.adotapet.exception.BadRequestException;
-import com.extensao.adotapet.exception.ForbiddenException;
-import com.extensao.adotapet.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 
 import java.util.List;
 
@@ -26,69 +20,116 @@ public class AnimalService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public AnimalResponseDTO cadastrarAnimal(AnimalRequestDTO data){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+
+    // cadastrar animal
+
+
+    public AnimalResponseDTO cadastrarAnimal(AnimalRequestDTO data) {
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Usuário não autenticado");
+        }
 
         Usuario usuario = (Usuario) auth.getPrincipal();
 
         String email = usuario.getEmail();
 
         usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("Usuário não encontrado"));
-
+                .orElseThrow(() ->
+                        new RuntimeException("Usuário não encontrado")
+                );
 
         if (!usuario.getTipoUsuario().equals(TipoUsuario.ROLE_ONG)) {
-            throw new ForbiddenException("Apenas ONG pode cadastrar animais");
+            throw new RuntimeException(
+                    "Apenas usuários ONG podem cadastrar animais"
+            );
         }
 
         Animal animalData = new Animal(data);
-        animalData.setCor(Util.normalizar(data.cor()));
-        animalData.setRaca(Util.normalizar(data.raca()));
-        animalData.setLocalizacao(Util.normalizar(data.localizacao()));
+
+        // Todo animal começa disponível para adoção
+        animalData.setStatus(Status.DISPONIVEL);
+
+        // Associa o animal à ONG que fez o cadastro
         animalData.setOng(usuario);
-        repository.save(animalData);
-        return new AnimalResponseDTO(animalData);
+
+        Animal animalSalvo = repository.save(animalData);
+
+        return new AnimalResponseDTO(animalSalvo);
     }
 
-    public List<AnimalResponseDTO> getAll() {
 
-        return repository.findAll()
-                .stream()
-                .map(AnimalResponseDTO::new)
-                .toList();
-    }
+
+    // buscar animais com filtros
+
 
     public List<AnimalResponseDTO> buscar(AnimalFiltroDTO filtro) {
 
-        Specification<Animal> spec = Specification
-                .where(AnimalSpecification.disponivel());
+        Specification<Animal> spec =
+                AnimalSpecification.disponivel();
 
-        if (filtro.especie() != null)
-            spec = spec.and(AnimalSpecification.especie(filtro.especie()));
+        if (filtro.especie() != null) {
+            spec = spec.and(
+                    AnimalSpecification.especie(filtro.especie())
+            );
+        }
 
-        if (filtro.raca() != null && !filtro.raca().isBlank())
-            spec = spec.and(AnimalSpecification.raca(filtro.raca()));
+        if (filtro.raca() != null && !filtro.raca().isBlank()) {
+            spec = spec.and(
+                    AnimalSpecification.raca(filtro.raca())
+            );
+        }
 
-        if (filtro.sexo() != null)
-            spec = spec.and(AnimalSpecification.sexo(filtro.sexo()));
+        if (filtro.sexo() != null) {
+            spec = spec.and(
+                    AnimalSpecification.sexo(filtro.sexo())
+            );
+        }
 
-        if (filtro.cor() != null && !filtro.cor().isBlank())
-            spec = spec.and(AnimalSpecification.cor(filtro.cor()));
+        if (filtro.cor() != null && !filtro.cor().isBlank()) {
+            spec = spec.and(
+                    AnimalSpecification.cor(filtro.cor())
+            );
+        }
 
-        if (filtro.idade() != null)
-            spec = spec.and(AnimalSpecification.idade(filtro.idade()));
+        if (filtro.idade() != null) {
+            spec = spec.and(
+                    AnimalSpecification.idade(filtro.idade())
+            );
+        }
 
-        if (filtro.porte() != null)
-            spec = spec.and(AnimalSpecification.porte(filtro.porte()));
+        if (filtro.porte() != null) {
+            spec = spec.and(
+                    AnimalSpecification.porte(filtro.porte())
+            );
+        }
 
-        if (filtro.possuiChip() != null)
-            spec = spec.and(AnimalSpecification.possuiChip(filtro.possuiChip()));
+        if (filtro.possuiChip() != null) {
+            spec = spec.and(
+                    AnimalSpecification.possuiChip(filtro.possuiChip())
+            );
+        }
 
-        if (filtro.vacinado() != null)
-            spec = spec.and(AnimalSpecification.vacinado(filtro.vacinado()));
+        if (filtro.localizacao() != null &&
+                !filtro.localizacao().isBlank()) {
 
-        if (filtro.localizacao() != null && !filtro.localizacao().isBlank())
-            spec = spec.and(AnimalSpecification.localizacao(filtro.localizacao()));
+            spec = spec.and(
+                    AnimalSpecification.localizacao(
+                            filtro.localizacao()
+                    )
+            );
+        }
+
+        if (filtro.vacinado() != null) {
+            spec = spec.and(
+                    AnimalSpecification.vacinado(filtro.vacinado())
+            );
+        }
 
         return repository.findAll(spec)
                 .stream()
@@ -96,84 +137,123 @@ public class AnimalService {
                 .toList();
     }
 
-    public AnimalResponseDTO getById(Long id){
+
+
+    // listar todos os animais
+
+
+    public List<AnimalResponseDTO> getAll() {
+
+        return repository.findAll(
+                AnimalSpecification.disponivel()
+                )
+                .stream()
+                .map(AnimalResponseDTO::new)
+                .toList();
+    }
+
+
+
+    // buscar animal por id
+
+    public AnimalResponseDTO getById(Long id) {
+
         Animal animal = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Animal não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Animal não encontrado")
+                );
+
         return new AnimalResponseDTO(animal);
     }
 
-    public void deleteById(Long id){
+    // deletar o animal
+
+    public void delete(Long id) {
+
         Animal animal = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Animal não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Animal não encontrado")
+                );
 
         repository.delete(animal);
     }
 
-    public void inativar(Long id){
+
+
+    // inativar o animal
+
+
+    public AnimalResponseDTO inativar(Long id) {
+
         Animal animal = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Animal não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Animal não encontrado")
+                );
+
         animal.setStatus(Status.INATIVO);
-        repository.save(animal);
+
+        Animal animalAtualizado = repository.save(animal);
+
+        return new AnimalResponseDTO(animalAtualizado);
     }
 
-    public void ativar(Long id){
+
+
+    // ativar animal
+
+
+    public AnimalResponseDTO ativar(Long id) {
+
         Animal animal = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Animal não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Animal não encontrado")
+                );
+
         animal.setStatus(Status.DISPONIVEL);
-        repository.save(animal);
+
+        Animal animalAtualizado = repository.save(animal);
+
+        return new AnimalResponseDTO(animalAtualizado);
     }
 
-    public AnimalResponseDTO atualizaParcial(Long id, AnimalUpdateDTO dto) {
+
+
+    // atualizar animal
+
+    public AnimalResponseDTO atualizar(
+            Long id,
+            AnimalRequestDTO data
+    ) {
+
         Animal animal = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Animal não encontrado"));
+                .orElseThrow(() ->
+                        new RuntimeException("Animal não encontrado")
+                );
 
-        if (animal.getStatus() == Status.ADOTADO || animal.getStatus() == Status.INATIVO) {
-            throw new ForbiddenException("Não é possível editar um Animal Adotado ou Inativo");
-        }
-        if (dto.getNome() != null) {
-            animal.setNome(dto.getNome());
-        }
-        if (dto.getRaca() != null){
-            animal.setRaca(Util.normalizar(dto.getRaca()));
-        }
-        if (dto.getIdade() != null) {
-            animal.setIdade(dto.getIdade());
-        }
-        if (dto.getHistoricoSaude() != null) {
-            animal.setHistoricoSaude(dto.getHistoricoSaude());
-        }
-        if (dto.getComportamento() != null) {
-            animal.setComportamento(dto.getComportamento());
-        }
-        if (dto.getFotos() != null) {
-            animal.setFotos(dto.getFotos());
-        }
-        if (dto.getPossuiChip() != null) {
-            animal.setPossuiChip(dto.getPossuiChip());
-        }
-        if (dto.getLocalizacao() != null){
-            animal.setLocalizacao(Util.normalizar(dto.getLocalizacao()));
-        }
-        if (dto.getVacinado() != null) {
-            animal.setVacinado(dto.getVacinado());
-        }
-        if (dto.getEspecie() != null){
-            animal.setEspecie(dto.getEspecie());
-        }
-        if (dto.getPorte() != null){
-            animal.setPorte(dto.getPorte());
-        }
-        if (dto.getSexo() != null){
-            animal.setSexo(dto.getSexo());
-        }
-        if (dto.getStatus() != null){
-            animal.setStatus(dto.getStatus());
-        }
-        if (dto.getCor() != null){
-            animal.setCor(Util.normalizar(dto.getCor()));
-        }
-        repository.save(animal);
-        return new AnimalResponseDTO(animal);
+        animal.setNome(data.nome());
+        animal.setRaca(data.raca());
+        animal.setIdade(data.idade());
+        animal.setHistoricoSaude(data.historicoSaude());
+        animal.setComportamento(data.comportamento());
+        animal.setFotos(data.fotos());
+        animal.setPossuiChip(data.possuiChip());
+        animal.setLocalizacao(data.localizacao());
+        animal.setVacinado(data.vacinado());
+        animal.setEspecie(data.especie());
+        animal.setPorte(data.porte());
+        animal.setSexo(data.sexo());
+        animal.setCor(data.cor());
+
+        /*
+         * O status NÃO é alterado aqui através do DTO.
+         *
+         * Isso evita que o frontend consiga, por exemplo,
+         * transformar um animal ADOTADO em DISPONIVEL
+         * simplesmente enviando outro status.
+         */
+
+        Animal animalAtualizado = repository.save(animal);
+
+        return new AnimalResponseDTO(animalAtualizado);
     }
-
 }
