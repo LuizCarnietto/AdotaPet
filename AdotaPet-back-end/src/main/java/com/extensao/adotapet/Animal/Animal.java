@@ -1,5 +1,6 @@
 package com.extensao.adotapet.Animal;
 
+import com.extensao.adotapet.raca.Raca;
 import com.extensao.adotapet.localizacao.Cidade;
 import com.extensao.adotapet.Enum.*;
 import com.extensao.adotapet.Usuario.Usuario;
@@ -21,7 +22,6 @@ public class Animal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String nome;
-    private String raca;
 
     @Enumerated(EnumType.STRING)
     private Idade idade;
@@ -45,6 +45,10 @@ public class Animal {
     @JoinColumn(name = "cidade_id")
     private Cidade cidade;
 
+    @ManyToOne
+    @JoinColumn(name = "raca_id")
+    private Raca raca;
+
     @Enumerated(EnumType.STRING)
     private Especie especie;
 
@@ -59,7 +63,6 @@ public class Animal {
 
     public Animal(AnimalRequestDTO data){
         this.nome = data.nome();
-        this.raca = data.raca();
         this.idade = data.idade();
         this.historicoSaude = data.historicoSaude();
         this.comportamento = data.comportamento();
@@ -73,5 +76,4 @@ public class Animal {
         this.status = data.status();
         this.cor = data.cor();
     }
-
 }

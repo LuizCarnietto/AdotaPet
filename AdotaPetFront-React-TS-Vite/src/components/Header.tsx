@@ -25,7 +25,7 @@ export const Header = (): JSX.Element => {
               <a href="/cadastros/RegistroAnimal" className="text-black hover:underline font-mono">
                 Registrar Animal
               </a>
-              })
+              }
             </div>
           </div>
           <Button variant="secondary" size="icon" className="rounded-full">

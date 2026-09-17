@@ -5,6 +5,8 @@ import com.extensao.adotapet.Enum.*;
 public record AnimalResponseDTO(
         Long id,
         String nome,
+
+        Long racaId,
         String raca,
         Idade idade,
         String historicoSaude,
@@ -32,7 +34,15 @@ public record AnimalResponseDTO(
         this(
                 animal.getId(),
                 animal.getNome(),
-                animal.getRaca(),
+
+                animal.getRaca() != null
+                        ? animal.getRaca().getId()
+                        : null,
+
+                animal.getRaca() != null
+                        ? animal.getRaca().getNome()
+                        : null,
+
                 animal.getIdade(),
                 animal.getHistoricoSaude(),
                 animal.getComportamento(),

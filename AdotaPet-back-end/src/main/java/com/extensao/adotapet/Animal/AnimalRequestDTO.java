@@ -3,7 +3,7 @@ package com.extensao.adotapet.Animal;
 import com.extensao.adotapet.Enum.*;
 
 public record AnimalRequestDTO(String nome,
-                               String raca,
+                               Long racaId,
                                Idade idade,
                                String historicoSaude,
                                String comportamento,

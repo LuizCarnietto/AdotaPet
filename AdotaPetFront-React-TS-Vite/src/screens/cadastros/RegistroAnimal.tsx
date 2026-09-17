@@ -1,10 +1,22 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "../../services/ApiService";
 
 export default function RegistroAnimal() {
   const navigate = useNavigate();
 
+  const [estados, setEstados] = useState<any[]>([]);
+  const [cidades, setCidades] = useState<any[]>([]);
+  const [estadoId, setEstadoId] = useState("");
+  const [cidadeId, setCidadeId] = useState("");
+
+  const [racaTexto, setRacaTexto] = useState("");
+  const [racaId, setRacaId] = useState("");
+  const [racasSugestoes, setRacasSugestoes] = useState<any[]>([]);
+  const [buscandoRacas, setBuscandoRacas] = useState(false);
+  const [especieSelecionada, setEspecieSelecionada] = useState("");
+
+  // Verifica se o usuário é uma ONG
   useEffect(() => {
     const tipoUsuario = localStorage.getItem("tipoUsuario");
 
@@ -12,6 +24,87 @@ export default function RegistroAnimal() {
       navigate("/");
     }
   }, [navigate]);
+
+  // Busca os estados ao abrir a página
+  useEffect(() => {
+    const buscarEstados = async () => {
+      try {
+        const response = await apiService.get("/localizacao/estados");
+
+        setEstados(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar estados:", error);
+        alert("Não foi possível carregar os estados.");
+      }
+    };
+
+    buscarEstados();
+  }, []);
+
+  // Busca as cidades quando o estado muda
+  useEffect(() => {
+    if (!estadoId) {
+      setCidades([]);
+      setCidadeId("");
+      return;
+    }
+
+    const buscarCidades = async () => {
+      try {
+        const response = await apiService.get(
+          `/localizacao/cidades/${estadoId}`,
+        );
+
+        setCidades(response.data);
+        setCidadeId("");
+      } catch (error) {
+        console.error("Erro ao buscar cidades:", error);
+
+        setCidades([]);
+        setCidadeId("");
+
+        alert("Não foi possível carregar as cidades.");
+      }
+    };
+
+    buscarCidades();
+  }, [estadoId]);
+
+  // Busca raças de acordo com a espécie e o que foi digitado
+  useEffect(() => {
+    if (!especieSelecionada) {
+      setRacasSugestoes([]);
+      return;
+    }
+
+    const buscarRacas = async () => {
+      try {
+        setBuscandoRacas(true);
+
+        const response = await apiService.get(
+          `/racas/${especieSelecionada}/buscar`,
+          {
+            params: {
+              nome: racaTexto.trim(),
+            },
+          },
+        );
+
+        setRacasSugestoes(response.data);
+      } catch (error) {
+        console.error("Erro ao buscar raças:", error);
+        setRacasSugestoes([]);
+      } finally {
+        setBuscandoRacas(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      buscarRacas();
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [racaTexto, especieSelecionada]);
 
   const cadastrarAnimal = async () => {
     try {
@@ -29,10 +122,6 @@ export default function RegistroAnimal() {
 
       const idadeInput = document.getElementById(
         "idade",
-      ) as HTMLSelectElement | null;
-
-      const especieInput = document.getElementById(
-        "especie",
       ) as HTMLSelectElement | null;
 
       const microchipInput = document.getElementById(
@@ -55,33 +144,27 @@ export default function RegistroAnimal() {
         "vacinado",
       ) as HTMLSelectElement | null;
 
-      const localizacaoInput = document.getElementById(
-        "localizacao",
-      ) as HTMLInputElement | null;
-
-      // valores
+      // Valores
 
       const nome = nomeInput?.value.trim() || "";
       const comportamento = descricaoInput?.value.trim() || "";
-      const raca = racaInput?.value.trim() || "";
       const idade = idadeInput?.value || "";
-      const especie = especieInput?.value || "";
+      const especie = especieSelecionada;
       const microchip = microchipInput?.value || "";
       const sexo = sexoInput?.value || "";
       const porte = porteInput?.value || "";
       const cor = corInput?.value.trim() || "";
       const vacinado = vacinadoInput?.value || "";
-      const localizacao = localizacaoInput?.value.trim() || "";
 
-      // Validando
+      // Validações
 
       if (!nome) {
         alert("Digite o nome do animal.");
         return;
       }
 
-      if (!raca) {
-        alert("Digite a raça do animal.");
+      if (!racaId) {
+        alert("Selecione uma raça.");
         return;
       }
 
@@ -120,8 +203,13 @@ export default function RegistroAnimal() {
         return;
       }
 
-      if (!localizacao) {
-        alert("Digite a localização do animal.");
+      if (!estadoId) {
+        alert("Selecione o estado.");
+        return;
+      }
+
+      if (!cidadeId) {
+        alert("Selecione a cidade.");
         return;
       }
 
@@ -130,7 +218,7 @@ export default function RegistroAnimal() {
         return;
       }
 
-      // fotos
+      // Fotos
 
       const fotos = Array.from(
         document.querySelectorAll<HTMLImageElement>("img.miniatura"),
@@ -143,12 +231,12 @@ export default function RegistroAnimal() {
         return;
       }
 
-      // convertendo para o formato esperado pelo backend (Java)
+      // Payload enviado para o backend
 
       const payload = {
         nome: nome,
 
-        raca: raca,
+        racaId: Number(racaId),
 
         idade: idade.toUpperCase(),
 
@@ -160,7 +248,7 @@ export default function RegistroAnimal() {
 
         possuiChip: microchip === "sim",
 
-        localizacao: localizacao,
+        cidadeId: Number(cidadeId),
 
         vacinado: vacinado === "sim",
 
@@ -189,7 +277,7 @@ export default function RegistroAnimal() {
 
       alert("Animal cadastrado com sucesso!");
 
-      // vai para a lista de adoção
+      // Vai para a lista de adoção
 
       navigate("/listaadotar");
     } catch (error: any) {
@@ -197,7 +285,6 @@ export default function RegistroAnimal() {
 
       if (error.response) {
         console.error("Status:", error.response.status);
-
         console.error("Resposta:", error.response.data);
 
         if (error.response.status === 401) {
@@ -237,9 +324,13 @@ export default function RegistroAnimal() {
           @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
           @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
+          * {
+            box-sizing: border-box;
+          }
+
           body {
-            padding: 0px;
-            margin: 0px;
+            padding: 0;
+            margin: 0;
             display: flex;
             align-items: center;
             flex-direction: column;
@@ -249,18 +340,20 @@ export default function RegistroAnimal() {
           header {
             background-color: white;
             width: 100%;
-            padding: 40px 0px 40px 0px;
+            height: 90px;
+            padding: 10px 0;
             align-items: center;
             text-align: center;
             display: flex;
             justify-content: center;
+            box-sizing: border-box;
           }
 
           nav {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 80px;
+            gap: 70px;
           }
 
           nav > a:hover {
@@ -268,8 +361,9 @@ export default function RegistroAnimal() {
           }
 
           nav > a > img {
-            height: 70px;
-            width: 80px;
+            height: 65px;
+            width: 75px;
+            object-fit: contain;
           }
 
           a {
@@ -285,16 +379,20 @@ export default function RegistroAnimal() {
             align-items: flex-start;
             max-width: 1440px;
             width: 100%;
-            padding: 0px 46px 0px 46px;
-            margin: 30px auto 0px auto;
+            padding: 0 30px;
+            margin: 15px auto 0 auto;
             box-sizing: border-box;
+            gap: 50px;
+          }
+
+          #containerFotosAnimal {
+            flex-shrink: 0;
           }
 
           div#fotoAnimal {
             background-color: white;
-            width: 549px;
-            height: 549px;
-            margin-right: 107px;
+            width: 460px;
+            height: 460px;
             border-radius: 20px;
             display: flex;
             justify-content: center;
@@ -338,9 +436,9 @@ export default function RegistroAnimal() {
             align-items: flex-end;
             justify-content: center;
             background-color: white;
-            width: 550px;
-            margin-top: 36px;
-            gap: 18px;
+            width: 460px;
+            margin-top: 15px;
+            gap: 12px;
           }
 
           .miniaturaWrapper {
@@ -391,13 +489,14 @@ export default function RegistroAnimal() {
           }
 
           img.miniatura {
-            width: 116px;
-            height: 116px;
+            width: 90px;
+            height: 90px;
             border-radius: 20px;
             cursor: pointer;
             transition: 0.3s;
             opacity: 0.8;
             border: 3px solid #36c3ff;
+            object-fit: cover;
           }
 
           img.miniatura:hover {
@@ -409,8 +508,8 @@ export default function RegistroAnimal() {
           }
 
           .slotVazio {
-            width: 116px;
-            height: 116px;
+            width: 90px;
+            height: 90px;
             border-radius: 20px;
             border: 2px dashed #ccd6e0;
             background-color: #f4f8fb;
@@ -428,43 +527,43 @@ export default function RegistroAnimal() {
 
           div#descricaoAnimal {
             background-color: white;
-            width: 686px;
+            width: 650px;
             border-radius: 20px;
-            padding: 40px;
+            padding: 24px;
             box-shadow: 0px 4px 8px rgba(0,0,0,25%);
             box-sizing: border-box;
           }
 
           #descricaoAnimal > input {
             width: 100%;
-            padding: 14px 18px;
-            margin-bottom: 16px;
+            padding: 10px 16px;
+            margin-bottom: 10px;
             background: #f9fbfd;
             border: 1px solid #dce3ea;
             border-radius: 10px;
             box-sizing: border-box;
             font-family: "Montserrat", sans-serif;
             font-weight: 700;
-            font-size: 42px;
+            font-size: 30px;
             color: #222;
           }
 
           #descricaoAnimal textarea {
             width: 100%;
-            min-height: 120px;
-            padding: 18px;
+            min-height: 80px;
+            padding: 12px;
             background: #f9fbfd;
             border-radius: 10px;
             border: 1px solid #dce3ea;
             box-sizing: border-box;
             resize: vertical;
-            font-size: 16px;
+            font-size: 14px;
             font-family: "Inter", sans-serif;
           }
 
           input::placeholder,
           textarea::placeholder {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             font-family: "Inter", sans-serif;
           }
@@ -472,8 +571,8 @@ export default function RegistroAnimal() {
           .containerCard {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
+            gap: 14px;
+            margin-top: 14px;
             font-family: "Inter", sans-serif;
           }
 
@@ -482,33 +581,17 @@ export default function RegistroAnimal() {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 34px;
+            gap: 12px;
             text-align: center;
           }
 
-          div.infoCard1 {
-            background-color: white;
-            width: 263px;
-            height: 80px;
-            margin-right: 24px;
-            padding-top: 10px;
-            padding-bottom: 10px;
-            border-width: 1px;
-            border-radius: 20px;
-            box-shadow: 0px 4px 8px rgba(0,0,0,25%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-          }
-
+          div.infoCard1,
           div.infoCard2 {
             background-color: white;
             width: 263px;
-            height: 80px;
-            margin-left: 24px;
-            padding-top: 10px;
-            padding-bottom: 10px;
+            height: 68px;
+            padding-top: 7px;
+            padding-bottom: 7px;
             border-width: 1px;
             border-radius: 20px;
             box-shadow: 0px 4px 8px rgba(0,0,0,25%);
@@ -520,10 +603,10 @@ export default function RegistroAnimal() {
 
           .infoCard1 label,
           .infoCard2 label {
-            font-size: 16px;
+            font-size: 14px;
             color: black;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
           }
 
           .infoCard1 input,
@@ -531,36 +614,295 @@ export default function RegistroAnimal() {
           .infoCard1 select,
           .infoCard2 select {
             width: 80%;
-            height: 100%;
-            padding: 1px 2px;
+            height: 30px;
+            padding: 2px 4px;
             border: 1px solid #dce3ea;
             border-radius: 10px;
             text-align: center;
-            font-size: 14px;
+            font-size: 12px;
             background: #f9fbfd;
             outline: none;
           }
 
+          .racaAutocomplete {
+              position: relative;
+              width: 80%;
+            }
+
+            .racaAutocomplete input {
+              width: 100%;
+              height: 30px;
+              padding: 2px 4px;
+              border: 1px solid #dce3ea;
+              border-radius: 10px;
+              text-align: center;
+              font-size: 12px;
+              background: #f9fbfd;
+              outline: none;
+              box-sizing: border-box;
+            }
+
+            .racaAutocomplete input:disabled {
+            background-color: #eef2f5;
+            cursor: not-allowed;
+            opacity: 0.7;
+            }
+
+            .racaSugestoes {
+              position: absolute;
+              top: 100%;
+              left: 0;
+              width: 100%;
+              background: white;
+              border: 1px solid #dce3ea;
+              border-radius: 10px;
+              box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+              z-index: 1000;
+              max-height: 180px;
+              overflow-y: auto;
+            }
+
+            .racaSugestao {   
+              padding: 9px 12px;
+              cursor: pointer;
+              font-family: "Inter", sans-serif;
+              font-size: 12px;
+              text-align: left;
+            }
+
+            .racaSugestao:hover {
+              background-color: #f0f8fc;
+            }
+
+            .racaBuscando {
+              position: absolute;
+              top: 100%;
+              left: 0;
+              width: 100%;
+              padding: 9px 12px;
+              background: white;
+              border: 1px solid #dce3ea;
+              border-radius: 10px;
+              font-family: "Inter", sans-serif;
+              font-size: 12px;
+              z-index: 1000;
+            }
+
+          .localizacaoCard {
+            height: 95px !important;
+          }
+
+          .localizacaoCampos {
+            width: 90%;
+            display: flex;
+            gap: 6px;
+          }
+
+          .localizacaoCampos select {
+            width: 50% !important;
+            height: 30px !important;
+            padding: 2px 4px !important;
+            font-size: 11px !important;
+          }
+
+          .localizacaoCampos select:disabled {
+            opacity: 0.6;
+          }
+
           #botaoAzul {
-            width: 350px;
-            height: 59px;
+            width: 300px;
+            height: 48px;
             color: white;
             background-color: #36c3ff;
             border: none;
             border-radius: 40px;
             font-family: "Inter", sans-serif;
             font-weight: bold;
-            font-size: 24px;
+            font-size: 18px;
             display: block;
             text-align: center;
-            margin: 38px auto 0 auto;
-            line-height: 59px;
+            margin: 18px auto 0 auto;
+            line-height: 48px;
             cursor: pointer;
           }
 
           #botaoAzul:hover {
             background-color: #1ab0f0;
             transition: background-color 0.2s ease;
+          }
+
+          /* ================================
+             TELAS HD / ALTURA MENOR
+             ================================ */
+
+          @media (max-height: 850px) {
+            header {
+              height: 70px;
+              padding: 5px 0;
+            }
+
+            nav {
+              gap: 55px;
+            }
+
+            nav > a > img {
+              height: 52px;
+              width: 65px;
+            }
+
+            div#container {
+              margin-top: 8px;
+              gap: 35px;
+              padding: 0 25px;
+            }
+
+            div#fotoAnimal {
+              width: 390px;
+              height: 390px;
+            }
+
+            div#cardFotoAnimal {
+              width: 390px;
+              margin-top: 10px;
+              gap: 8px;
+            }
+
+            img.miniatura,
+            .slotVazio {
+              width: 72px;
+              height: 72px;
+            }
+
+            div#descricaoAnimal {
+              width: 600px;
+              padding: 18px;
+            }
+
+            #descricaoAnimal > input {
+              font-size: 25px;
+              padding: 9px 14px;
+              margin-bottom: 8px;
+            }
+
+            #descricaoAnimal textarea {
+              min-height: 65px;
+              padding: 10px;
+            }
+
+            .containerCard {
+              gap: 8px;
+              margin-top: 8px;
+            }
+
+            div.cardBoxEsquerdo,
+            div.cardBoxDireito {
+              gap: 7px;
+            }
+
+            div.infoCard1,
+            div.infoCard2 {
+              height: 54px;
+              padding-top: 5px;
+              padding-bottom: 5px;
+            }
+
+            .infoCard1 label,
+            .infoCard2 label {
+              font-size: 12px;
+              margin-bottom: 3px;
+            }
+
+            .infoCard1 input,
+            .infoCard2 input,
+            .infoCard1 select,
+            .infoCard2 select {
+              height: 25px;
+              font-size: 11px;
+            }
+
+            .localizacaoCard {
+              height: 70px !important;
+            }
+
+            .localizacaoCampos select {
+              height: 25px !important;
+              font-size: 10px !important;
+            }
+
+            #botaoAzul {
+              width: 260px;
+              height: 42px;
+              line-height: 42px;
+              font-size: 16px;
+              margin-top: 10px;
+            }
+          }
+
+          /* ================================
+             TELAS MÉDIAS
+             ================================ */
+
+          @media (max-width: 1200px) {
+            div#container {
+              gap: 25px;
+              padding: 0 20px;
+            }
+
+            div#fotoAnimal {
+              width: 400px;
+              height: 400px;
+            }
+
+            div#cardFotoAnimal {
+              width: 400px;
+            }
+
+            div#descricaoAnimal {
+              width: 560px;
+            }
+
+            nav {
+              gap: 40px;
+            }
+          }
+
+          /* ================================
+             CELULAR / TELAS PEQUENAS
+             ================================ */
+
+          @media (max-width: 900px) {
+            body {
+              overflow-y: auto;
+            }
+
+            header {
+              height: auto;
+              padding: 15px;
+            }
+
+            nav {
+              gap: 20px;
+              flex-wrap: wrap;
+            }
+
+            div#container {
+              flex-direction: column;
+              align-items: center;
+              margin-top: 20px;
+            }
+
+            div#fotoAnimal {
+              width: min(90vw, 450px);
+              height: min(90vw, 450px);
+            }
+
+            div#cardFotoAnimal {
+              width: 100%;
+            }
+
+            div#descricaoAnimal {
+              width: min(95vw, 650px);
+            }
           }
         `}
       </style>
@@ -593,8 +935,9 @@ export default function RegistroAnimal() {
           </div>
 
           {/* Miniaturas com controles */}
+
           <div id="cardFotoAnimal">
-            {/*slot 1*/}
+            {/* SLOT 1 */}
 
             <div className="miniaturaWrapper" id="wrapper-0">
               <div className="miniaturaControles">
@@ -640,7 +983,6 @@ export default function RegistroAnimal() {
 
                       if (imagemGrande) {
                         imagemGrande.src = "";
-
                         imagemGrande.classList.remove("ativa");
 
                         const placeholder =
@@ -662,7 +1004,6 @@ export default function RegistroAnimal() {
 
                         if (grande) {
                           grande.src = outra.src;
-
                           grande.classList.add("ativa");
 
                           const placeholder =
@@ -723,7 +1064,6 @@ export default function RegistroAnimal() {
 
                         if (imagemGrande) {
                           imagemGrande.src = img!.src;
-
                           imagemGrande.classList.add("ativa");
 
                           const placeholder =
@@ -752,7 +1092,6 @@ export default function RegistroAnimal() {
 
                     if (imagemGrande) {
                       imagemGrande.src = img.src;
-
                       imagemGrande.classList.add("ativa");
 
                       const placeholder =
@@ -777,7 +1116,7 @@ export default function RegistroAnimal() {
               <div className="slotVazio">+</div>
             </div>
 
-            {/* slot 2*/}
+            {/* SLOT 2 */}
 
             <div className="miniaturaWrapper" id="wrapper-1">
               <div className="miniaturaControles">
@@ -823,7 +1162,6 @@ export default function RegistroAnimal() {
 
                       if (imagemGrande) {
                         imagemGrande.src = "";
-
                         imagemGrande.classList.remove("ativa");
 
                         const placeholder =
@@ -845,7 +1183,6 @@ export default function RegistroAnimal() {
 
                         if (grande) {
                           grande.src = outra.src;
-
                           grande.classList.add("ativa");
 
                           const placeholder =
@@ -906,7 +1243,6 @@ export default function RegistroAnimal() {
 
                         if (imagemGrande) {
                           imagemGrande.src = img!.src;
-
                           imagemGrande.classList.add("ativa");
 
                           const placeholder =
@@ -935,7 +1271,6 @@ export default function RegistroAnimal() {
 
                     if (imagemGrande) {
                       imagemGrande.src = img.src;
-
                       imagemGrande.classList.add("ativa");
 
                       const placeholder =
@@ -960,7 +1295,7 @@ export default function RegistroAnimal() {
               <div className="slotVazio">+</div>
             </div>
 
-            {/* slot 3*/}
+            {/* SLOT 3 */}
 
             <div className="miniaturaWrapper" id="wrapper-2">
               <div className="miniaturaControles">
@@ -1006,7 +1341,6 @@ export default function RegistroAnimal() {
 
                       if (imagemGrande) {
                         imagemGrande.src = "";
-
                         imagemGrande.classList.remove("ativa");
 
                         const placeholder =
@@ -1028,7 +1362,6 @@ export default function RegistroAnimal() {
 
                         if (grande) {
                           grande.src = outra.src;
-
                           grande.classList.add("ativa");
 
                           const placeholder =
@@ -1089,7 +1422,6 @@ export default function RegistroAnimal() {
 
                         if (imagemGrande) {
                           imagemGrande.src = img!.src;
-
                           imagemGrande.classList.add("ativa");
 
                           const placeholder =
@@ -1118,7 +1450,6 @@ export default function RegistroAnimal() {
 
                     if (imagemGrande) {
                       imagemGrande.src = img.src;
-
                       imagemGrande.classList.add("ativa");
 
                       const placeholder =
@@ -1145,7 +1476,7 @@ export default function RegistroAnimal() {
           </div>
         </div>
 
-        {/* descrição */}
+        {/* Descrição */}
 
         <div className="contDescricaoAnimal">
           <div id="descricaoAnimal">
@@ -1158,19 +1489,55 @@ export default function RegistroAnimal() {
             <textarea placeholder="Descreva o animal aqui"></textarea>
           </div>
 
-          {/* cards */}
+          {/* Cards */}
 
           <div className="containerCard">
+            {/* COLUNA ESQUERDA */}
+
             <div className="cardBoxEsquerdo">
               <div className="infoCard1">
                 <label htmlFor="raca">Raça</label>
 
-                <input
-                  id="raca"
-                  type="text"
-                  placeholder="Digite a raça do animal"
-                  defaultValue=""
-                />
+                <div className="racaAutocomplete">
+                  <input
+                    id="raca"
+                    type="text"
+                    placeholder={
+                      especieSelecionada
+                      ? "Digite a raça do animal"
+                      : "Selecione 1° a espécie do animal"
+                    }
+                    value={racaTexto}
+                    onChange={(e) => {
+                      setRacaTexto(e.target.value);
+                      setRacaId("");
+                    }}
+                    autoComplete="off"
+                    disabled={!especieSelecionada}
+                  />
+
+                  {racasSugestoes.length > 0 && (
+                    <div className="racaSugestoes">
+                      {racasSugestoes.map((raca) => (
+                        <div
+                          key={raca.id}
+                          className="racaSugestao"
+                          onClick={() => {
+                            setRacaTexto(raca.nome);
+                            setRacaId(String(raca.id));
+                            setRacasSugestoes([]);
+                          }}
+                        >
+                          {raca.nome}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {buscandoRacas && (
+                    <div className="racaBuscando">Buscando...</div>
+                  )}
+                </div>
               </div>
 
               <div className="infoCard1">
@@ -1190,9 +1557,18 @@ export default function RegistroAnimal() {
               </div>
 
               <div className="infoCard1">
-                <label htmlFor="especie">Tipo de animal</label>
+                <label htmlFor="especie">Espécie do animal</label>
 
-                <select id="especie" defaultValue="">
+                <select
+                  id="especie"
+                  value={especieSelecionada}
+                  onChange={(e) => {
+                    setEspecieSelecionada(e.target.value);
+                    setRacaTexto("");
+                    setRacaId("");
+                    setRacasSugestoes([]);
+                  }}
+                >
                   <option value="" disabled>
                     Selecione uma opção
                   </option>
@@ -1217,17 +1593,49 @@ export default function RegistroAnimal() {
                 </select>
               </div>
 
-              <div className="infoCard1">
-                <label htmlFor="localizacao">Localização</label>
+              {/* LOCALIZAÇÃO */}
 
-                <input
-                  id="localizacao"
-                  type="text"
-                  placeholder="Ex: Londrina - PR"
-                  defaultValue=""
-                />
+              <div className="infoCard1 localizacaoCard">
+                <label>Localização</label>
+
+                <div className="localizacaoCampos">
+                  <select
+                    id="estado"
+                    value={estadoId}
+                    onChange={(e) => setEstadoId(e.target.value)}
+                  >
+                    <option value="" disabled>
+                      Estado
+                    </option>
+
+                    {estados.map((estado) => (
+                      <option key={estado.id} value={estado.id}>
+                        {estado.sigla} - {estado.nome}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    id="cidade"
+                    value={cidadeId}
+                    onChange={(e) => setCidadeId(e.target.value)}
+                    disabled={!estadoId}
+                  >
+                    <option value="" disabled>
+                      {estadoId ? "Cidade" : "Selecione o estado"}
+                    </option>
+
+                    {cidades.map((cidade) => (
+                      <option key={cidade.id} value={cidade.id}>
+                        {cidade.nome}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
+
+            {/* COLUNA DIREITA */}
 
             <div className="cardBoxDireito">
               <div className="infoCard2">

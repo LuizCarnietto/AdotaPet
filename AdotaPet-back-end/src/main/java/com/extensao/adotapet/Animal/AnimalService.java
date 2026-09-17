@@ -1,5 +1,7 @@
 package com.extensao.adotapet.Animal;
 
+import com.extensao.adotapet.raca.Raca;
+import com.extensao.adotapet.raca.RacaRepository;
 import com.extensao.adotapet.localizacao.Cidade;
 import com.extensao.adotapet.localizacao.CidadeRepository;
 import com.extensao.adotapet.Enum.Status;
@@ -17,6 +19,8 @@ import java.util.List;
 
 @Service
 public class AnimalService {
+    @Autowired
+    private RacaRepository racaRepository;
 
     @Autowired
     private AnimalRepository repository;
@@ -35,8 +39,18 @@ public class AnimalService {
             animal.setNome(dto.getNome());
         }
 
-        if (dto.getRaca() != null) {
-            animal.setRaca(dto.getRaca());
+        if (dto.getRacaId() != null) {
+            Raca raca = racaRepository.findById(dto.getRacaId())
+                    .orElseThrow(() -> new RuntimeException("Raça não encontrada"));
+
+            if (dto.getEspecie() != null
+                    && raca.getEspecie() != dto.getEspecie()) {
+                throw new RuntimeException(
+                        "A raça selecionada não pertence à espécie informada"
+                );
+            }
+
+            animal.setRaca(raca);
         }
 
         if (dto.getIdade() != null) {
@@ -125,15 +139,22 @@ public class AnimalService {
         }
 
         Cidade cidade = cidadeRepository.findById(data.cidadeId())
-                .orElseThrow(() ->
-                        new RuntimeException("Cidade não encontrada")
-                );
+                .orElseThrow(() -> new RuntimeException("Cidade não encontrada"));
+
+        Raca raca = racaRepository.findById(data.racaId())
+                .orElseThrow(() -> new RuntimeException("Raça não encontrada"));
+        if (raca.getEspecie() != data.especie()) {
+            throw new RuntimeException(
+                    "A raça selecionada não pertence à espécie informada"
+            );
+        }
 
         Animal animalData = new Animal(data);
 
         animalData.setStatus(Status.DISPONIVEL);
         animalData.setOng(usuario);
         animalData.setCidade(cidade);
+        animalData.setRaca(raca);
 
         Animal animalSalvo = repository.save(animalData);
 
@@ -333,8 +354,6 @@ public class AnimalService {
                 );
 
         animal.setNome(data.nome());
-
-        animal.setRaca(data.raca());
 
         animal.setIdade(data.idade());
 
