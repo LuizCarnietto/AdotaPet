@@ -13,6 +13,7 @@ public record AnimalResponseDTO(
         String comportamento,
         String fotos,
         boolean possuiChip,
+        boolean vacinado,
 
         Long cidadeId,
         String cidade,
@@ -48,6 +49,7 @@ public record AnimalResponseDTO(
                 animal.getComportamento(),
                 animal.getFotos(),
                 animal.isPossuiChip(),
+                animal.isVacinado(),
 
                 animal.getCidade() != null
                         ? animal.getCidade().getId()

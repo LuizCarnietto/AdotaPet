@@ -20,7 +20,7 @@ export const routesList = createBrowserRouter([
   },
 
   {
-    path: "/editar",
+    path: "/editar/animal/:id",
     element: <EditarAnimal />,
   },
 

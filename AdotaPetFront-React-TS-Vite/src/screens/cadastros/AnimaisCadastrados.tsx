@@ -158,7 +158,7 @@ export default function AnimaisCadastrados() {
               onClick={() => navigate("/cadastros/RegistroAnimal")}
               className="mt-6 px-6 py-3 rounded-full bg-sky-400 text-white font-bold hover:bg-sky-500 transition"
             >
-              Cadastrar animal
+              Cadastrar Animal
             </button>
           </div>
         ) : (
@@ -238,9 +238,7 @@ export default function AnimaisCadastrados() {
                     <div className="mt-auto pt-5">
                       <button
                         type="button"
-                        onClick={() =>
-                          navigate(`/editar?animalId=${animal.id}`)
-                        }
+                        onClick={() => navigate(`/editar/animal/${animal.id}`)}
                         className="w-full py-2.5 rounded-full bg-sky-400 text-white font-bold hover:bg-sky-500 transition"
                       >
                         Editar animal
