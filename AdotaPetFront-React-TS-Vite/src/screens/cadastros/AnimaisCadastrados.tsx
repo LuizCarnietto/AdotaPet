@@ -121,6 +121,42 @@ export default function AnimaisCadastrados() {
     buscarAnimais();
   }, [navigate, tipoUsuario, token]);
 
+  const excluirAnimal = async (id: number, nome: string) => {
+    const confirmar = window.confirm(`Tem certeza que deseja excluir ${nome}?`);
+
+    if (!confirmar) return;
+
+    try {
+      await apiService.delete(`/animal/${id}`);
+
+      // Remove o animal da tela sem precisar recarregar a página
+      setAnimais((animaisAtuais) =>
+        animaisAtuais.filter((animal) => animal.id !== id),
+      );
+
+      alert("Animal excluído com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao excluir animal:", error);
+
+      if (error.response?.status === 401) {
+        alert("Sua sessão expirou. Faça login novamente.");
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("tipoUsuario");
+
+        navigate("/login");
+        return;
+      }
+
+      if (error.response?.status === 403) {
+        alert("Você não tem permissão para excluir este animal.");
+        return;
+      }
+
+      alert("Não foi possível excluir o animal.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Header mostrarRegistrarAnimal={!carregando && animais.length > 0} />
@@ -235,13 +271,21 @@ export default function AnimaisCadastrados() {
                       </p>
                     </div>
 
-                    <div className="mt-auto pt-5">
+                    <div className="flex gap-3">
                       <button
                         type="button"
                         onClick={() => navigate(`/editar/animal/${animal.id}`)}
-                        className="w-full py-2.5 rounded-full bg-sky-400 text-white font-bold hover:bg-sky-500 transition"
+                        className="flex-1 bg-[#36c3ff] text-white py-2 rounded-xl hover:bg-[#1ab0f0] transition-colors"
                       >
                         Editar animal
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => excluirAnimal(animal.id, animal.nome)}
+                        className="flex-1 bg-red-500 text-white py-2 rounded-xl hover:bg-red-600 transition-colors"
+                      >
+                        Excluir animal
                       </button>
                     </div>
                   </div>

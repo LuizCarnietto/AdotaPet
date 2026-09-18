@@ -30,22 +30,29 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
+
                         // público: login
                         .requestMatchers("/auth/**").permitAll()
 
                         // público: cadastro de usuário
-                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuario").permitAll()
-
                         .requestMatchers(
-                                org.springframework.http.HttpMethod.GET,
-                                "/animal/ong"
-                        ).hasAuthority("ROLE_ONG")
+                                org.springframework.http.HttpMethod.POST,"/usuario").permitAll()
+
+                        // somente ONG lista seus animais
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,"/animal/ong").hasAuthority("ROLE_ONG")
 
                         // público: visualização de animais
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/animal/**").permitAll()
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,"/animal/**").permitAll()
 
-                        // Só a ONG cadastra o animal
-                        .requestMatchers(org.springframework.http.HttpMethod.POST,"/animal").hasAuthority("ROLE_ONG")
+                        // somente ONG cadastra animal
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.POST,"/animal").hasAuthority("ROLE_ONG")
+
+                        // somente ONG exclui animal
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.DELETE, "/animal/**").hasAuthority("ROLE_ONG")
 
                         // tudo o resto precisa login
                         .anyRequest().authenticated()

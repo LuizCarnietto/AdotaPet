@@ -285,12 +285,29 @@ public class AnimalService {
 
     public void delete(Long id) {
 
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Usuário não autenticado");
+        }
+
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
         Animal animal = repository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException(
-                                "Animal não encontrado"
-                        )
+                        new RuntimeException("Animal não encontrado")
                 );
+
+        // Verifica se o animal pertence à ONG logada
+        if (animal.getOng() == null ||
+                animal.getOng().getId() != usuario.getId()) {
+
+            throw new RuntimeException(
+                    "Você não tem permissão para excluir este animal"
+            );
+        }
 
         repository.delete(animal);
     }
