@@ -17,7 +17,7 @@ public class PerguntaPadrao {
     private Long id;
 
     private String texto;
-    private Boolean ativo;
+    private Boolean ativo = true;
 
     @Enumerated(EnumType.STRING)
     private TipoPergunta tipo;
@@ -25,5 +25,6 @@ public class PerguntaPadrao {
     public PerguntaPadrao(String texto, TipoPergunta tipo) {
         this.texto = texto;
         this.tipo = tipo;
+        this.ativo = true;
     }
 }
