@@ -1504,8 +1504,8 @@ export default function RegistroAnimal() {
                     type="text"
                     placeholder={
                       especieSelecionada
-                      ? "Digite a raça do animal"
-                      : "Selecione 1° a espécie do animal"
+                        ? "Digite a raça do animal"
+                        : "Selecione 1° a espécie do animal"
                     }
                     value={racaTexto}
                     onChange={(e) => {

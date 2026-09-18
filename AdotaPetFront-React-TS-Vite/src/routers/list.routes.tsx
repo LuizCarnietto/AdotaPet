@@ -1,6 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { ROOT_PATH } from "../constants/route.constant";
-import { ListaAdotar } from "../screens/listaadotar/LIstaAdotar.tsx";
+import { ListaAdotar } from "../screens/listaadotar/ListaAdotar.tsx";
+import DetalhesAnimal from "../screens/listaadotar/DetalhesAnimal.tsx";
 import EditarAnimal from "../screens/editar/EditarAnimal";
 import FormularioAdocao from "../screens/formularios/FormularioAdocao.tsx";
 import RegistrarAnimal from "@/screens/cadastros/RegistrarAnimal.tsx";
@@ -64,5 +65,10 @@ export const routesList = createBrowserRouter([
   {
     path: "/listaadotar",
     element: <ListaAdotar />,
+  },
+
+  {
+    path: "/listaadotar/DetalhesAnimal/:id",
+    element: <DetalhesAnimal />,
   },
 ]);

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, Info, MessageCircle, User } from "lucide-react";
 import {
   Select,
@@ -15,6 +16,7 @@ import axios from "axios";
 import { apiService } from "@/services/ApiService";
 
 interface AnimalType {
+  id: number;
   img: string;
   name: string;
   gender: string;
@@ -42,6 +44,7 @@ const obterFoto = (fotos: string | null | undefined): string => {
 
 const ListarAnimais = () => {
   const [animais, setAnimais] = useState<AnimalType[]>([]);
+  const navigate = useNavigate();
 
   const [paginaAtual, setPaginaAtual] = useState(1);
   const animaisPorPagina = 16;
@@ -95,6 +98,7 @@ const ListarAnimais = () => {
       setAnimais(
         response.data.map((pet: any) => {
           return {
+            id: pet.id,
             img: obterFoto(pet.fotos),
             name: pet.nome,
             gender: pet.sexo,
@@ -144,6 +148,7 @@ const ListarAnimais = () => {
       setAnimais(
         response.data.map((pet: any) => {
           return {
+            id: pet.id,
             img: obterFoto(pet.fotos),
             name: pet.nome,
             gender: pet.sexo,
@@ -534,8 +539,11 @@ const ListarAnimais = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {animaisDaPagina.map((pet, index) => (
               <div
-                key={index}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200"
+                key={pet.id}
+                onClick={() =>
+                  navigate(`/listaadotar/DetalhesAnimal/${pet.id}`)
+                }
+                className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200 cursor-pointer"
               >
                 <img
                   src={pet.img}
