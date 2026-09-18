@@ -37,7 +37,7 @@ AdotaPet/
 
 - **Backend**: Java + Spring Boot, expõe a API REST na porta `8080`.
 - **Frontend**: React + TypeScript, com Vite, rodando na porta `5173`.
-- **Banco de dados**: MySQL. O schema é criado a partir de um arquivo `.sql` próprio (não é gerado automaticamente pela aplicação).
+- **Banco de dados**: MySQL. O schema (tabelas) é criado e atualizado automaticamente pelo Hibernate ao subir o backend.
 
 ---
 
@@ -47,22 +47,20 @@ Antes de rodar o projeto, tenha instalado:
 
 - Java JDK `26`
 - Maven `3.9.14`
-- Node.js `v24.15.0` e npm `11.12.1´
+- Node.js `v24.15.0` e npm `11.12.1`
 - MySQL `8.0.45`
 
 ---
 
 ## 4. Configurando o banco de dados
 
-1. Crie um banco de dados no MySQL:
-   ```sql
-   CREATE DATABASE [nome_do_banco];
-   ```
+Não é necessário criar as tabelas manualmente — o backend usa Hibernate configurado para criar/atualizar o schema automaticamente ao rodar. Você só precisa criar o banco vazio:
 
-2. Execute o script `.sql` de criação das tabelas (localizado em `[caminho do arquivo .sql dentro do repositório]`):
-   ```bash
-   mysql -u [seu_usuario] -p [nome_do_banco] < [caminho/para/o/arquivo.sql]
-   ```
+```sql
+CREATE DATABASE adotapet
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+```
 
 ---
 
@@ -73,26 +71,27 @@ Antes de rodar o projeto, tenha instalado:
    cd AdotaPet-back-end
    ```
 
-2. Configure o acesso ao banco em `src/main/resources/application.properties`:
-   ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/[nome_do_banco]
-   spring.datasource.username=[seu_usuario_mysql]
-   spring.datasource.password=[sua_senha_mysql]
-   spring.jpa.hibernate.ddl-auto=none
-   ```
+2. Configure o acesso ao banco em `src/main/resources/application.yaml`:
+```yaml
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/adotapet
+    username: root
+    password: sua_senha_aquiD
+  jpa:
+    hibernate:
+      ddl-auto: update
+```
 
-3. Execute a aplicação:
-   ```
-   AdotaPet-back-end/
-   └── src/
-    └── main/
-        └── java/
-            └── com/
-                └── extensao/
-                    └── adotapet/
-                        └── AdotapetApplication.java
-   ```
-   Executa a aplicação dentro do arquivo AdotapetApplication.java dentro de seu compilador.
+3. Execute a aplicação. Você pode rodar de duas formas:
+
+   **Pela IDE:** abra o arquivo `AdotaPet-back-end/src/main/java/com/extensao/adotapet/AdotapetApplication.java` e clique em "Run" no seu compilador.
+
+   **Pelo terminal:**
+```bash
+   cd AdotaPet-back-end
+   mvn spring-boot:run
+```
 
 4. A API estará disponível em `http://localhost:8080`.
 
@@ -136,6 +135,6 @@ Os diagramas completos (casos de uso, classes e entidade-relacionamento) estão 
 
 ## 9. Autores
 
-`Bruno Broietti Serenato, 
- Luiz Carnietto,  
- Luis Filipe Anklan.`
+- Bruno Broietti Serenato
+- Luiz Carnietto
+- Luis Filipe Anklan
