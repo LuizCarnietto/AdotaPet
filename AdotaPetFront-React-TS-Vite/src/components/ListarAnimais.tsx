@@ -552,7 +552,7 @@ const ListarAnimais = () => {
                 />
 
                 <div className="p-4">
-                  <h2 className="text-xl font-bold text-gray-800 mb-2 uppercase">
+                  <h2 className="text-xl font-bold text-[#36C3FF] mb-2 uppercase">
                     {pet.name}
                   </h2>
 

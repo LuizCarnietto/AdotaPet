@@ -1,5 +1,8 @@
 package com.extensao.adotapet.Animal;
 
+import com.extensao.adotapet.Usuario.Usuario;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +32,19 @@ public class AnimalController {
     @GetMapping
     public List<AnimalResponseDTO> getAll() {
         return animalService.getAll();
+    }
+
+    @GetMapping("/ong")
+    public List<AnimalResponseDTO> listarAnimaisDaOng() {
+
+        Authentication auth =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        Usuario ong = (Usuario) auth.getPrincipal();
+
+        return animalService.listarAnimaisDaOng(ong);
     }
 
     @GetMapping("/{id}")

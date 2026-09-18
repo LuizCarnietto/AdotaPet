@@ -11,8 +11,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import java.util.List;
 
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -35,6 +35,11 @@ public class SecurityConfig {
 
                         // público: cadastro de usuário
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuario").permitAll()
+
+                        .requestMatchers(
+                                org.springframework.http.HttpMethod.GET,
+                                "/animal/ong"
+                        ).hasAuthority("ROLE_ONG")
 
                         // público: visualização de animais
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/animal/**").permitAll()
@@ -85,7 +90,7 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of("http://localhost:5173"));
 
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
         config.setAllowedHeaders(List.of("*"));
 

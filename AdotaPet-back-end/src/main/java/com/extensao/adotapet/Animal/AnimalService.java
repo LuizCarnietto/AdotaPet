@@ -403,4 +403,12 @@ public class AnimalService {
                 animalAtualizado
         );
     }
+    public List<AnimalResponseDTO> listarAnimaisDaOng(Usuario ong) {
+
+        return repository
+                .findByOngOrderByIdDesc(ong)
+                .stream()
+                .map(AnimalResponseDTO::new)
+                .toList();
+    }
 }
