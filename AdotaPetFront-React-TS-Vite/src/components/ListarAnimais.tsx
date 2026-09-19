@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Info, MessageCircle, User } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -12,7 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import axios from "axios";
 import { apiService } from "@/services/ApiService";
 
 interface AnimalType {
@@ -54,7 +52,7 @@ const ListarAnimais = () => {
   const [estadoId, setEstadoId] = useState("");
   const [cidadeId, setCidadeId] = useState("");
   const [racaTexto, setRacaTexto] = useState("");
-  const [racaId, setRacaId] = useState("");
+  const [, setRacaId] = useState("");
   const [racasSugestoes, setRacasSugestoes] = useState<any[]>([]);
   const [buscandoRacas, setBuscandoRacas] = useState(false);
 
@@ -537,7 +535,7 @@ const ListarAnimais = () => {
 
         <section className="flex-1 bg-violet-200/30 rounded-3xl p-6 min-h-[600px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {animaisDaPagina.map((pet, index) => (
+            {animaisDaPagina.map((pet) => (
               <div
                 key={pet.id}
                 onClick={() =>

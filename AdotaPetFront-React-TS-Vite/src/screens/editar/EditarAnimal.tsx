@@ -17,7 +17,7 @@ export default function EdicaoAnimal() {
   const [buscandoRacas, setBuscandoRacas] = useState(false);
   const [especieSelecionada, setEspecieSelecionada] = useState("");
 
-  const [carregandoAnimal, setCarregandoAnimal] = useState(true);
+  const [, setCarregandoAnimal] = useState(true);
 
   // Verifica se o usuário é uma ONG
   useEffect(() => {

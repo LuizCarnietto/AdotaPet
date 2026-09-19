@@ -301,16 +301,6 @@ const formatarCPF = (valor: string) => {
     .replace(/\.(\d{3})(\d)/, ".$1-$2");
 };
 
-const formatarCNPJ = (valor: string) => {
-  const numeros = somenteNumeros(valor).slice(0, 14);
-
-  return numeros
-    .replace(/^(\d{2})(\d)/, "$1.$2")
-    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
-    .replace(/\.(\d{3})(\d)/, ".$1/$2")
-    .replace(/(\d{4})(\d)/, "$1-$2");
-};
-
 const formatarCEP = (valor: string) => {
   const numeros = somenteNumeros(valor).slice(0, 8);
 

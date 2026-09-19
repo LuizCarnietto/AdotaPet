@@ -1,8 +1,5 @@
 import { User } from "lucide-react";
-import { APP_NAME } from "../constants/app.constant";
-import { ModeToggle } from "./mode-toggle";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
 
 interface HeaderProps {
   mostrarRegistrarAnimal?: boolean;

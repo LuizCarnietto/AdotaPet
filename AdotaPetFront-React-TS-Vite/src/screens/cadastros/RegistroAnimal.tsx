@@ -116,10 +116,6 @@ export default function RegistroAnimal() {
         "#descricaoAnimal textarea",
       ) as HTMLTextAreaElement | null;
 
-      const racaInput = document.getElementById(
-        "raca",
-      ) as HTMLInputElement | null;
-
       const idadeInput = document.getElementById(
         "idade",
       ) as HTMLSelectElement | null;
