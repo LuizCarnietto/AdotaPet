@@ -4,7 +4,6 @@ import { ListaAdotar } from "../screens/listaadotar/ListaAdotar.tsx";
 import DetalhesAnimal from "../screens/listaadotar/DetalhesAnimal.tsx";
 import EditarAnimal from "../screens/editar/EditarAnimal";
 import FormularioAdocao from "../screens/formularios/FormularioAdocao.tsx";
-import RegistrarAnimal from "@/screens/cadastros/RegistrarAnimal.tsx";
 import { Login } from "@/screens/login/Login.tsx";
 import HomePage from "@/screens/home/HomePage.tsx";
 import CadastroUsuario from "@/screens/cadastros/CadastroUsuario.tsx";
@@ -30,11 +29,6 @@ export const routesList = createBrowserRouter([
   },
 
   {
-    path: "/cadastros",
-    element: <RegistrarAnimal/>,
-  },
-
-  {
     path: "/cadastros/CadastroUsuario",
     element: <CadastroUsuario/>,
   },
@@ -48,11 +42,7 @@ export const routesList = createBrowserRouter([
       path: "/cadastros/RegistroAnimal",
       element: <RegistroAnimal/>,
     },
-    {
-      path: "/cadastros/RegistrarAnimal", //apagar depois
-      element: <RegistrarAnimal/>,
-    },
-   
+
     {
       path: "/cadastros/AnimaisCadastrados",
       element: <AnimaisCadastrados/>,

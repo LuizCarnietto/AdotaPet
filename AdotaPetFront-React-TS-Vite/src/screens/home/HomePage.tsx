@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Header } from "@/components/Header";
 
-// ─── Dados das seções ─────────────────────────────────────────────────────────
+
+const token = localStorage.getItem("token");
+const estaLogado = !!token;
+
 const comoFuncionaItems = [
   {
     bg: "url('/imagens/ongimg.png')",
@@ -32,7 +36,6 @@ const faqDireito = [
   "Existe algum custo para usar a plataforma?",
 ];
 
-// ─── Componente principal ─────────────────────────────────────────────────────
 export default function HomePage() {
   const [faqAberto, setFaqAberto] = useState<number | null>(null);
 
@@ -42,6 +45,11 @@ export default function HomePage() {
 
   return (
     <div style={styles.body}>
+    {estaLogado ? (
+      <Header corFundo="rgb(54, 195, 255)" logoSrc="/imagens/logoEscrita01.png"
+      homeComoAdotar={true}
+      />
+    ) : (
       <header style={styles.header}>
         <nav style={styles.nav}>
           <Link to="/login" className="nav-link" style={styles.navLink} onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')} onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}>
@@ -65,6 +73,7 @@ export default function HomePage() {
           </a>
         </nav>
       </header>
+    )}
 
       <div style={styles.divInicial}>
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -82,20 +91,7 @@ export default function HomePage() {
       </div>
 
       {/* Logo + Sobre */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: 38,
-          marginBottom: 10,
-        }}
-      >
-        <img
-          src="/imagens/logoMelhor.png"
-          alt="Logo Completa"
-          style={{ width: 139, height: 121 }}
-        />
-      </div>
+
       <h1 style={styles.titPreto}>Sobre</h1>
       <p style={styles.pInfo}>
         Bem-vindo ao Adota Pet, a plataforma que conecta ONGs de proteção <br />
@@ -145,12 +141,16 @@ export default function HomePage() {
       </div>
 
       {/* CTA */}
-      <h1 style={{ ...styles.titPreto, marginBottom: 44 }}>
-        Quer fazer parte disso?
-      </h1>
-      <Link to="/cadastros/CadastroUsuario" style={styles.botaoRegistre}>
-        Registre-se agora
-      </Link>
+      {!estaLogado && (
+      <>
+        <h1 style={{ ...styles.titPreto, marginBottom: 44 }}>
+          Quer fazer parte disso?
+        </h1>
+        <Link to="/cadastros/CadastroUsuario" style={styles.botaoRegistre}>
+          Registre-se agora
+        </Link>
+      </>
+      )}
 
       {/* FAQ */}
       <div id="faq" style={styles.faqSection}>
@@ -271,6 +271,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: "black",
     textDecoration: "underline",
     textAlign: "center",
+    marginTop: 38,
     marginBottom: 38,
   },
   pInfo: {

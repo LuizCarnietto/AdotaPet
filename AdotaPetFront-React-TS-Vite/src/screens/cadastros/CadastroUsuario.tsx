@@ -280,7 +280,7 @@ export default function CadastroUsuario() {
   return (
     <div
       style={{
-        fontFamily: '"Inter", "Courier Prime", sans-serif',
+        fontFamily: '"Inter", "Courier New", sans-serif',
         margin: 0,
       }}
     >
@@ -302,7 +302,7 @@ export default function CadastroUsuario() {
               key={item}
               href={item === "F.A.Q" ? "/#faq" : "/"}
               style={{
-                fontFamily: '"Courier Prime", monospace',
+                fontFamily: '"Courier New", Courier, monospace',
                 fontSize: 16,
                 textDecoration: "none",
                 color: "#aaaaaa",

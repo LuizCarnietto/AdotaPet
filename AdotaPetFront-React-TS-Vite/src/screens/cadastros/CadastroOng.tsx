@@ -243,7 +243,7 @@ export default function CadastroOng() {
         @import url("https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
         body {
-          font-family: "Inter", "Courier Prime", sans-serif;
+          font-family: "Inter", "Courier New", sans-serif;
           margin: 0px;
         }
 
@@ -480,7 +480,7 @@ export default function CadastroOng() {
               key={item}
               href={item === "F.A.Q" ? "/#faq" : "/"}
               style={{
-                fontFamily: '"Courier Prime", monospace',
+                fontFamily: '"Courier New", Courier, monospace',
                 fontSize: 16,
                 textDecoration: "none",
                 color: "#aaaaaa",
