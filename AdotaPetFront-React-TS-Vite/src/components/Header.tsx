@@ -77,6 +77,8 @@ export const Header = ({
               href="/login"
               className={`
                 transition-colors
+                duration-200
+                ease-in-out
                 font-light
                 rounded-[20px]
                 text-[14px]

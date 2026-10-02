@@ -11,6 +11,7 @@ import EsqueceuSenha from "@/screens/login/EsqueceuSenha.tsx";
 import CadastroOng from "@/screens/cadastros/CadastroOng.tsx";
 import RegistroAnimal from "@/screens/cadastros/RegistroAnimal.tsx";
 import AnimaisCadastrados from "@/screens/cadastros/AnimaisCadastrados.tsx";
+import Candidaturas from "@/screens/formularios/Candidaturas.tsx";
 
 export const routesList = createBrowserRouter([
   {
@@ -26,6 +27,11 @@ export const routesList = createBrowserRouter([
   {
     path: "/formularios",
     element: <FormularioAdocao />,
+  },
+
+  {
+    path: "/candidaturas",
+    element: <Candidaturas />,
   },
 
   {

@@ -671,7 +671,7 @@ export default function FormularioAdocao() {
             </div>
 
             <div className="p-3">
-              <p className="font-bold text-sky-500 text-lg leading-tight">
+              <p className="font-bold text-sky-500 text-lg leading-tight uppercase">
                 {animalInfo.nome}
               </p>
 

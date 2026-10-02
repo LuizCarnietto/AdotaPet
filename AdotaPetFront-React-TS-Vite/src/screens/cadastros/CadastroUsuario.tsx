@@ -861,6 +861,7 @@ export default function CadastroUsuario() {
                 width: 100,
                 height: 35,
                 cursor: "pointer",
+                transition: "background-color 0.2s ease",
               }}
               onMouseEnter={(e) =>
                 (e.currentTarget.style.backgroundColor = "#1ab0f0")

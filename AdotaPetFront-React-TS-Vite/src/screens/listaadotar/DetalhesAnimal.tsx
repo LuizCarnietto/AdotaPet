@@ -335,7 +335,8 @@ export default function DetalhesAnimal() {
             font-family: "Montserrat", sans-serif;
             font-weight: 700;
             font-size: 42px;
-
+            color: #36c3ff;
+            text-transform: uppercase;
             overflow-wrap: anywhere;
           }
 

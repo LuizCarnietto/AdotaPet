@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 
 
 const token = localStorage.getItem("token");
 const estaLogado = !!token;
+
+const tipoUsuario = localStorage.getItem("tipoUsuario");
+
+const ehAdotante = tipoUsuario === "ROLE_ADOTANTE";
+const ehOng = tipoUsuario === "ROLE_ONG";
 
 const comoFuncionaItems = [
   {
@@ -48,6 +54,7 @@ export default function HomePage() {
     {estaLogado ? (
       <Header corFundo="rgb(54, 195, 255)" logoSrc="/imagens/logoEscrita01.png"
       homeComoAdotar={true}
+      mostrarRegistrarAnimal={ehOng}
       />
     ) : (
       <header style={styles.header}>

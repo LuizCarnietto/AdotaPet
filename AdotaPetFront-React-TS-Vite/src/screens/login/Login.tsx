@@ -33,7 +33,7 @@ export function Login() {
       if (tipoUsuario === "ROLE_ONG") {
         navigate("/cadastros/RegistroAnimal");
       } else if (tipoUsuario === "ROLE_ADOTANTE") {
-        navigate("/");
+        window.location.href = "/";
       }
     } catch {
       setErro("E-mail ou senha inválidos.");
