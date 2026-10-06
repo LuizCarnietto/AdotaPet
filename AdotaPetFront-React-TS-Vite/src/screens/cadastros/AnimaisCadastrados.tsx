@@ -122,7 +122,7 @@ export default function AnimaisCadastrados() {
   }, [navigate, tipoUsuario, token]);
 
   const excluirAnimal = async (id: number, nome: string) => {
-    const confirmar = window.confirm(`Tem certeza que deseja excluir ${nome}?`);
+    const confirmar = window.confirm(`Tem certeza que deseja excluir ${nome}?\n\nTodas as candidaturas vinculadas a este animal também serão removidas.`);
 
     if (!confirmar) return;
 
@@ -230,7 +230,7 @@ export default function AnimaisCadastrados() {
                   <div className="p-5 flex flex-col flex-1">
                     <div className="flex justify-between items-start gap-3">
                       <div>
-                        <h2 className="text-xl font-bold text-[#36c3ff]">
+                        <h2 className="text-xl font-bold text-[#36c3ff] uppercase">
                           {animal.nome}
                         </h2>
 
@@ -271,23 +271,31 @@ export default function AnimaisCadastrados() {
                       </p>
                     </div>
 
-                    <div className="flex gap-3">
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/editar/animal/${animal.id}`)}
-                        className="flex-1 bg-[#36c3ff] text-white py-2 rounded-xl hover:bg-[#1ab0f0] transition-colors"
-                      >
-                        Editar animal
-                      </button>
+                    {animal.status !== "ADOTADO" ? (
+                      <div className="flex gap-3 mt-[14px]">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(`/editar/animal/${animal.id}`)
+                          }
+                          className="flex-1 h-[35px] bg-[#36c3ff] text-white text-[14px] rounded-[20px] hover:bg-[#1ab0f0] transition-colors duration-200"
+                        >
+                          Editar animal
+                        </button>
 
-                      <button
-                        type="button"
-                        onClick={() => excluirAnimal(animal.id, animal.nome)}
-                        className="flex-1 bg-red-500 text-white py-2 rounded-xl hover:bg-red-600 transition-colors"
-                      >
-                        Excluir animal
-                      </button>
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => excluirAnimal(animal.id, animal.nome)}
+                          className="flex-1 h-[35px] bg-red-500 text-white text-[14px] rounded-[20px] hover:bg-red-600 transition-colors duration-200"
+                        >
+                          Excluir animal
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mt-[14px] h-[35px] flex items-center justify-center rounded-[20px] bg-green-100 text-green-700 text-[14px] font-semibold">
+                        Adoção concluída
+                      </div>
+                    )}
                   </div>
                 </div>
               );

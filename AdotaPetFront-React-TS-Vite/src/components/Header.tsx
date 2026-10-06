@@ -36,7 +36,7 @@ export const Header = ({
     >
       <nav className="flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-10">
-          <a href="/" className="hover:opacity-80 transition-opacity">
+          <a href="/" className="hover:opacity-70 transition-opacity">
             <img
               src={logoSrc}
               alt="Logo"

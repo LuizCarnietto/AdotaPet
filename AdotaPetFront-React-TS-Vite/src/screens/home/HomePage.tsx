@@ -70,6 +70,12 @@ export default function HomePage() {
               src="/imagens/logoEscrita.png"
               alt="Logo Escrita"
               style={styles.logoNav}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = "0.7";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = "1";
+              }}
             />
           </Link>
           <a href="#sobre" className="nav-link" style={styles.navLink} onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')} onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}>
@@ -234,6 +240,10 @@ const styles: Record<string, React.CSSProperties> = {
   logoNav: {
     height: 120,
     width: 120,
+    opacity: 1,
+  },
+  logoNavHover: {
+    opacity: 0.7,
   },
   divInicial: {
     backgroundColor: "#36C3FF",

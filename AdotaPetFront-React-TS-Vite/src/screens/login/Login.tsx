@@ -31,7 +31,7 @@ export function Login() {
       localStorage.setItem("tipoUsuario", tipoUsuario);
 
       if (tipoUsuario === "ROLE_ONG") {
-        navigate("/cadastros/RegistroAnimal");
+        window.location.href="/";
       } else if (tipoUsuario === "ROLE_ADOTANTE") {
         window.location.href = "/";
       }
@@ -60,7 +60,7 @@ export function Login() {
 
         <div className="login-content">
           {/* Logo */}
-          <div className="login-logo-container">
+          <div className="login-logo-container hover:opacity-70 transition-opacity">
             <a href="/">
               <img
                 src="/imagens/logoEscrita01.png"
