@@ -8,7 +8,10 @@ import com.extensao.adotapet.Enum.Status;
 import com.extensao.adotapet.Enum.TipoUsuario;
 import com.extensao.adotapet.Usuario.Usuario;
 import com.extensao.adotapet.Usuario.UsuarioRepository;
+import com.extensao.adotapet.FormularioAdocao.Repository.RespostaAdocaoRepository;
+import com.extensao.adotapet.FormularioAdocao.Entity.RespostaAdocao;
 
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
@@ -30,6 +33,9 @@ public class AnimalService {
 
     @Autowired
     private CidadeRepository cidadeRepository;
+
+    @Autowired
+    private RespostaAdocaoRepository respostaAdocaoRepository;
 
     public AnimalResponseDTO atualizaParcial(Long id, AnimalUpdateDTO dto) {
         Animal animal = repository.findById(id)
@@ -283,6 +289,7 @@ public class AnimalService {
 
     // deletar animal
 
+    @Transactional
     public void delete(Long id) {
 
         Authentication auth = SecurityContextHolder
@@ -290,14 +297,18 @@ public class AnimalService {
                 .getAuthentication();
 
         if (auth == null || !auth.isAuthenticated()) {
-            throw new RuntimeException("Usuário não autenticado");
+            throw new RuntimeException(
+                    "Usuário não autenticado"
+            );
         }
 
         Usuario usuario = (Usuario) auth.getPrincipal();
 
         Animal animal = repository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Animal não encontrado")
+                        new RuntimeException(
+                                "Animal não encontrado"
+                        )
                 );
 
         // Verifica se o animal pertence à ONG logada
@@ -309,6 +320,19 @@ public class AnimalService {
             );
         }
 
+        // Animal adotado deve permanecer no histórico
+        if (animal.getStatus() == Status.ADOTADO) {
+            throw new RuntimeException(
+                    "Animais adotados não podem ser excluídos"
+            );
+        }
+
+        List<RespostaAdocao> candidaturas =
+                respostaAdocaoRepository.findByAnimal(animal);
+
+        respostaAdocaoRepository.deleteAll(candidaturas);
+
+        // Depois remove o animal
         repository.delete(animal);
     }
 

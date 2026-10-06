@@ -11,6 +11,15 @@ import java.util.List;
 @Repository
 public interface RespostaAdocaoRepository
         extends JpaRepository<RespostaAdocao, Long> {
-    boolean existsByUsuarioAndAnimal(Usuario usuario, Animal animal);
-    List<RespostaAdocao> findByAnimalOngOrderByDataRespostaDesc(Usuario ong);
+
+    boolean existsByUsuarioAndAnimal(
+            Usuario usuario,
+            Animal animal
+    );
+
+    List<RespostaAdocao> findByAnimalOngOrderByDataRespostaDesc(
+            Usuario ong
+    );
+
+    List<RespostaAdocao> findByAnimal(Animal animal);
 }
