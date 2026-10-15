@@ -8,6 +8,7 @@ import {
   ClipboardList,
   Mail,
   MapPin,
+  PawPrint,
   Phone,
   User,
   X,
@@ -67,6 +68,10 @@ export default function Candidaturas() {
   const navigate = useNavigate();
 
   const [candidaturas, setCandidaturas] = useState<Candidatura[]>([]);
+  type FiltroCandidatura = "pendentes" | "aprovadas" | "reprovadas" | "todas";
+
+  const [filtroAtivo, setFiltroAtivo] =
+    useState<FiltroCandidatura>("pendentes");
   const [selecionada, setSelecionada] = useState<Candidatura | null>(null);
 
   const [carregando, setCarregando] = useState(true);
@@ -139,16 +144,7 @@ export default function Candidaturas() {
           : null,
       );
 
-      setCandidaturas((atuais) =>
-        atuais.map((candidatura) =>
-          candidatura.id === selecionada.id
-            ? {
-                ...candidatura,
-                status,
-              }
-            : candidatura,
-        ),
-      );
+      await buscarCandidaturas();
 
       alert(
         status === "APROVADO"
@@ -218,6 +214,66 @@ export default function Candidaturas() {
       `Animal #${candidatura.animalId ?? ""}`
     );
   };
+
+  const fotoDoAnimal = (candidatura: Candidatura): string => {
+    const fotos = candidatura.animal?.fotos;
+
+    if (!fotos) return "";
+
+    if (Array.isArray(fotos)) {
+      return fotos[0] || "";
+    }
+
+    try {
+      const resultado = JSON.parse(fotos);
+
+      if (Array.isArray(resultado)) {
+        return resultado[0] || "";
+      }
+
+      if (typeof resultado === "string") {
+        return resultado;
+      }
+    } catch {
+      return fotos;
+    }
+
+    return "";
+  };
+
+  const candidaturasFiltradas = candidaturas.filter((candidatura) => {
+    switch (filtroAtivo) {
+      case "pendentes":
+        return (
+          candidatura.status === "EM_ANALISE" ||
+          candidatura.status === "AGUARDANDO_APROVACAO"
+        );
+
+      case "aprovadas":
+        return candidatura.status === "APROVADO";
+
+      case "reprovadas":
+        return candidatura.status === "REPROVADO";
+
+      case "todas":
+        return true;
+
+      default:
+        return false;
+    }
+  });
+
+  const quantidadePendentes = candidaturas.filter(
+    (c) => c.status === "EM_ANALISE" || c.status === "AGUARDANDO_APROVACAO",
+  ).length;
+
+  const quantidadeAprovadas = candidaturas.filter(
+    (c) => c.status === "APROVADO",
+  ).length;
+
+  const quantidadeReprovadas = candidaturas.filter(
+    (c) => c.status === "REPROVADO",
+  ).length;
 
   if (selecionada) {
     return (
@@ -414,6 +470,44 @@ export default function Candidaturas() {
           </div>
         </div>
 
+        <div className="filtros-candidaturas">
+          <button
+            type="button"
+            className={filtroAtivo === "pendentes" ? "filtro ativo" : "filtro"}
+            onClick={() => setFiltroAtivo("pendentes")}
+          >
+            Pendentes
+            <span>{quantidadePendentes}</span>
+          </button>
+
+          <button
+            type="button"
+            className={filtroAtivo === "aprovadas" ? "filtro ativo" : "filtro"}
+            onClick={() => setFiltroAtivo("aprovadas")}
+          >
+            Aprovadas
+            <span>{quantidadeAprovadas}</span>
+          </button>
+
+          <button
+            type="button"
+            className={filtroAtivo === "reprovadas" ? "filtro ativo" : "filtro"}
+            onClick={() => setFiltroAtivo("reprovadas")}
+          >
+            Reprovadas
+            <span>{quantidadeReprovadas}</span>
+          </button>
+
+          <button
+            type="button"
+            className={filtroAtivo === "todas" ? "filtro ativo" : "filtro"}
+            onClick={() => setFiltroAtivo("todas")}
+          >
+            Todas
+            <span>{candidaturas.length}</span>
+          </button>
+        </div>
+
         {carregando ? (
           <div className="estado-vazio">Carregando candidaturas...</div>
         ) : candidaturas.length === 0 ? (
@@ -427,20 +521,36 @@ export default function Candidaturas() {
               animais, ele aparecerá aqui.
             </p>
           </div>
+        ) : candidaturasFiltradas.length === 0 ? (
+          <div className="estado-vazio">
+            <ClipboardList size={42} />
+
+            <h2>Nenhuma candidatura nesta categoria</h2>
+
+            <p>Não há candidaturas para exibir no filtro selecionado.</p>
+          </div>
         ) : (
           <div className="lista-candidaturas">
-            {candidaturas.map((candidatura) => (
+            {candidaturasFiltradas.map((candidatura) => (
               <article className="candidatura-card" key={candidatura.id}>
                 <div className="candidatura-principal">
-                  <div className="icone-candidato">
-                    <User size={23} />
+                  <div className="foto-animal-candidatura">
+                    {fotoDoAnimal(candidatura) ? (
+                      <img
+                        src={fotoDoAnimal(candidatura)}
+                        alt={`Foto de ${nomeDoAnimal(candidatura)}`}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <PawPrint size={25} />
+                    )}
                   </div>
 
                   <div className="dados-candidato">
                     <span className="animal-label">Candidatura para</span>
 
                     <h2 className="text-[#36c3ff] uppercase font-bold">
-                        {nomeDoAnimal(candidatura)}
+                      {nomeDoAnimal(candidatura)}
                     </h2>
 
                     <strong>{candidatura.nomeCompleto || "Candidato"}</strong>
@@ -547,6 +657,57 @@ function Estilos() {
           gap: 17px;
         }
 
+        .filtros-candidaturas {
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-bottom: 26px;
+        }
+
+        .filtro {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+
+          padding: 11px 18px;
+          border: 1px solid #e5e7eb;
+          border-radius: 20px;
+
+          background: white;
+          color: #64748b;
+
+          font-family: "Inter", sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .filtro span {
+          padding: 3px 8px;
+          border-radius: 12px;
+          background: #f1f5f9;
+          font-size: 12px;
+        }
+
+        .filtro:hover {
+          border-color: #36c3ff;
+          color: #36c3ff;
+        }
+
+        .filtro.ativo {
+          background: #36c3ff;
+          border-color: #36c3ff;
+          color: white;
+        }
+
+        .filtro.ativo span {
+          background: rgba(255, 255, 255, 0.25);
+          color: white;
+        }
+
         .candidatura-card {
           background: white;
           border: 1px solid #edf0f2;
@@ -575,18 +736,26 @@ function Estilos() {
           min-width: 0;
         }
 
-        .icone-candidato {
-          width: 52px;
-          height: 52px;
+        .foto-animal-candidatura {
+          width: 76px;
+          height: 76px;
           flex-shrink: 0;
 
-          border-radius: 50%;
+          border-radius: 16px;
+          overflow: hidden;
+
           background: #eaf8ff;
           color: #36c3ff;
 
           display: flex;
           align-items: center;
           justify-content: center;
+        }
+
+        .foto-animal-candidatura img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
 
         .dados-candidato {
@@ -955,6 +1124,16 @@ function Estilos() {
         @media (max-width: 480px) {
           .conteudo-candidaturas {
             width: calc(100% - 24px);
+          }
+
+          .filtros-candidaturas {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+
+          .filtro{
+          justify-content: center;
+          padding: 11px 10px;
           }
 
           .formulario-card {

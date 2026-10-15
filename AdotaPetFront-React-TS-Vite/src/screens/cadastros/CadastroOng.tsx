@@ -614,8 +614,7 @@ export default function CadastroOng() {
                 />
 
                 {/* Telefone */}
-                <label htmlFor="telefone">Telefone</label>
-
+                <label htmlFor="telefone">Telefone com WhatsApp</label>
                 <input
                   type="tel"
                   name="telefone"

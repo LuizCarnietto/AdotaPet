@@ -620,7 +620,7 @@ export default function CadastroUsuario() {
                       fontSize: 16,
                     }}
                   >
-                    Telefone
+                    Telefone com WhatsApp
                   </label>
 
                   <input
