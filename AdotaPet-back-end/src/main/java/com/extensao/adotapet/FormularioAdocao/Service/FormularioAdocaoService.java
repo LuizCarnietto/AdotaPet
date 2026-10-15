@@ -18,11 +18,17 @@ import com.extensao.adotapet.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.extensao.adotapet.FormularioAdocao.Dto.RespostaAdocaoResponseDTO;
+import com.extensao.adotapet.Enum.TipoUsuario;
+import org.springframework.transaction.annotation.Transactional;
+import com.extensao.adotapet.Notificacao.NotificacaoService;
 
 import java.util.List;
 
 @Service
 public class FormularioAdocaoService {
+    @Autowired
+    private NotificacaoService notificacaoService;
+
     @Autowired
     private AnimalRepository animalRepository;
 
@@ -35,6 +41,7 @@ public class FormularioAdocaoService {
     @Autowired
     private RespostaAdocaoRepository respostaAdocaoRepository;
 
+    @Transactional
     public void responder (RespostaRequestDTO dto, Usuario usuario) {
 
         Animal animal = animalRepository.findById(dto.getAnimalId())
@@ -88,8 +95,17 @@ public class FormularioAdocaoService {
             respostaAdocao.getRespostas().add(rp);
         }
         respostaAdocaoRepository.save(respostaAdocao);
+
+        notificacaoService.criar(
+                animal.getOng(),
+                "Nova candidatura recebida",
+                "Você recebeu uma nova candidatura para o animal "
+                        + animal.getNome() + ".",
+                respostaAdocao.getId()
+        );
     }
 
+    @Transactional
     public void atualizarStatus(Long idAdocao, StatusAdocao status, Usuario usuario) {
 
         RespostaAdocao adocao = respostaAdocaoRepository.findById(idAdocao)
@@ -115,8 +131,51 @@ public class FormularioAdocaoService {
         respostaAdocaoRepository.save(adocao);
 
         if (status == StatusAdocao.APROVADO) {
+            notificacaoService.criar(
+                    adocao.getUsuario(),
+                    "Candidatura aprovada!",
+                    "Sua candidatura para adotar "
+                            + animal.getNome()
+                            + " foi aprovada! Entre em contato com a ONG para combinar a retirada.",
+                    adocao.getId()
+            );
+
+        } else if (status == StatusAdocao.REPROVADO) {
+            notificacaoService.criar(
+                    adocao.getUsuario(),
+                    "Candidatura não aprovada",
+                    "Sua candidatura para adotar "
+                            + animal.getNome()
+                            + " não foi aprovada.",
+                    adocao.getId()
+            );
+        }
+
+        if (status == StatusAdocao.APROVADO) {
             animal.setStatus(Status.ADOTADO);
             animalRepository.save(animal);
+
+            List<RespostaAdocao> outrasCandidaturas =
+                    respostaAdocaoRepository.findByAnimal(animal);
+
+            for (RespostaAdocao outra : outrasCandidaturas) {
+                if (!outra.getId().equals(adocao.getId())
+                        && outra.getStatus() == StatusAdocao.EM_ANALISE) {
+
+                    outra.setStatus(StatusAdocao.REPROVADO);
+
+                    notificacaoService.criar(
+                            outra.getUsuario(),
+                            "Candidatura encerrada",
+                            "Sua candidatura para adotar "
+                                    + animal.getNome()
+                                    + " foi encerrada porque o animal foi destinado a outro adotante.",
+                            outra.getId()
+                    );
+                }
+            }
+
+            respostaAdocaoRepository.saveAll(outrasCandidaturas);
         }
     }
     public RespostaAdocaoResponseDTO buscarPorId(
@@ -159,4 +218,20 @@ public class FormularioAdocaoService {
                 .toList();
     }
 
+    public List<RespostaAdocaoResponseDTO> listarParaAdotante(
+            Usuario usuario
+    ) {
+
+        if (usuario.getTipoUsuario() != TipoUsuario.ROLE_ADOTANTE) {
+            throw new BusinessException(
+                    "Apenas adotantes podem consultar suas candidaturas"
+            );
+        }
+
+        return respostaAdocaoRepository
+                .findByUsuarioOrderByDataRespostaDesc(usuario)
+                .stream()
+                .map(RespostaAdocaoResponseDTO::new)
+                .toList();
+    }
 }

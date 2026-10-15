@@ -15,6 +15,7 @@ public record RespostaAdocaoResponseDTO(
 
         Long usuarioId,
 
+        String telefoneOng,
         String nomeCompleto,
         String dataNascimento,
         String cpf,
@@ -56,6 +57,10 @@ public record RespostaAdocaoResponseDTO(
                 respostaAdocao
                         .getUsuario()
                         .getId(),
+
+                respostaAdocao.getStatus() == StatusAdocao.APROVADO
+                        ? respostaAdocao.getAnimal().getOng().getTelefone()
+                        : null,
 
                 respostaAdocao.getNomeCompleto(),
                 respostaAdocao.getDataNascimento(),

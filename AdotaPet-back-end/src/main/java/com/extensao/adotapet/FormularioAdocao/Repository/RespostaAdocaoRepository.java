@@ -22,4 +22,8 @@ public interface RespostaAdocaoRepository
     );
 
     List<RespostaAdocao> findByAnimal(Animal animal);
+
+    List<RespostaAdocao> findByUsuarioOrderByDataRespostaDesc(
+            Usuario usuario
+    );
 }

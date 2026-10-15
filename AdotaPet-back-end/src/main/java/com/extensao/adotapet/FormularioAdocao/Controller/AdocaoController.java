@@ -79,4 +79,16 @@ public class AdocaoController {
 
         return respostaService.listarParaOng(ong);
     }
+
+    @GetMapping("/minhas")
+    public List<RespostaAdocaoResponseDTO> listarMinhasCandidaturas() {
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        return respostaService.listarParaAdotante(usuario);
+    }
 }
