@@ -25,7 +25,17 @@ export const Header = ({
   logoSrc = "/imagens/logoMelhor.png",
   homeComoAdotar = false,
 }: HeaderProps): JSX.Element => {
-  const tipoUsuario = localStorage.getItem("tipoUsuario");
+  const tipoUsuarioSalvo = (localStorage.getItem("tipoUsuario") || "")
+    .trim()
+    .toUpperCase();
+
+  const tipoUsuario = tipoUsuarioSalvo.includes("ONG")
+    ? "ROLE_ONG"
+    : tipoUsuarioSalvo.includes("ADOTANTE") ||
+        tipoUsuarioSalvo.includes("ADOTADOR")
+      ? "ROLE_ADOTANTE"
+      : tipoUsuarioSalvo;
+
   const token = localStorage.getItem("token");
   const estaLogado = !!token;
   const headerAzul = corFundo === "rgb(54, 195, 255)";
@@ -368,20 +378,15 @@ export const Header = ({
         `}
                 >
                   <a
-                    href="/perfil"
-                    className="
-                      flex
-                      items-center
-                      gap-3
-                      px-4
-                      py-3
-                      rounded-xl
-                      text-gray-700
-                      hover:bg-[#EAF8FF]
-                      hover:text-[#36c3ff]
-                      transition-colors
-                    "
-                  >
+                    href={
+                      tipoUsuario === "ROLE_ONG"
+                        ? "/perfil/PerfilOng"
+                        : "/perfil"
+                    }
+                    onClick={() => setMenuAberto(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl
+                      text-gray-700  hover:bg-[#EAF8FF]  hover:text-[#36c3ff]
+                      transition-colors">
                     <User className="w-4 h-4" />
                     Meu perfil
                   </a>
@@ -453,8 +458,7 @@ export const Header = ({
                       rounded-xl
                      text-red-500
                      hover:bg-red-50
-                      transition-colors
-                              "
+                      transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
                     Sair

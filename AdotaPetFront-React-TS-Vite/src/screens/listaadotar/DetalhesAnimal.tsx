@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiService } from "@/services/ApiService";
+import { Header } from "@/components/Header";
 
 interface Animal {
   id: number;
@@ -21,6 +22,10 @@ interface Animal {
   estadoSigla?: string;
   estadoNome?: string;
   fotos?: string | string[] | null;
+  cidadeOng?: string;
+  estadoSiglaOng?: string;
+  fotoPerfilOng?: string | null;
+  enderecoOng?: string | null;
 }
 
 const obterFotos = (fotos: string | string[] | null | undefined): string[] => {
@@ -61,8 +66,14 @@ export default function DetalhesAnimal() {
   const [imagemGrande, setImagemGrande] = useState("");
   const navigate = useNavigate();
 
-  const tipoUsuario = localStorage.getItem("tipoUsuario");
+  const tipoUsuario = (localStorage.getItem("tipoUsuario") || "")
+    .trim()
+    .toUpperCase();
+
   const token = localStorage.getItem("token");
+
+  const ehAdotante =
+    tipoUsuario.includes("ADOTANTE") || tipoUsuario.includes("ADOTADOR");
 
   useEffect(() => {
     const buscarAnimal = async () => {
@@ -154,6 +165,9 @@ export default function DetalhesAnimal() {
         ? `${animal.estadoSigla} - ${animal.cidade}`
         : animal.cidade || "Não informado";
 
+  const localizacaoOng =
+    animal.enderecoOng?.trim() || "Localização não informada";
+
   return (
     <>
       <style>
@@ -176,43 +190,6 @@ export default function DetalhesAnimal() {
 
           body {
             overflow-x: hidden;
-          }
-
-          /* ================================
-             HEADER
-             ================================ */
-
-          header {
-            background-color: white;
-            width: 100%;
-            padding: 30px 20px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-
-          nav {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 70px;
-          }
-
-          nav > a:hover {
-            text-decoration: underline;
-          }
-
-          nav > a > img {
-            width: 80px;
-            height: 70px;
-            object-fit: contain;
-          }
-
-          a {
-            text-decoration: none;
-            color: black;
-            font-family: "Courier New", Courier, monospace;
           }
 
           /* ================================
@@ -316,9 +293,9 @@ export default function DetalhesAnimal() {
             opacity: 1;
           }
 
-          /* ================================
-             DESCRIÇÃO
-             ================================ */
+          /* ============
+             Descrição
+             ============*/
 
           div#descricaoAnimal {
             width: 603px;
@@ -351,7 +328,7 @@ export default function DetalhesAnimal() {
           }
 
           /* ================================
-             CARDS
+             Cards
              ================================ */
 
           .containerCard {
@@ -454,6 +431,8 @@ export default function DetalhesAnimal() {
             text-decoration: none;
           }
 
+          
+
           /* ================================
              NOTEBOOK / TELAS MENORES
              ================================ */
@@ -482,18 +461,66 @@ export default function DetalhesAnimal() {
             }
           }
 
+          /* Informações da ONG abaixo das fotos do animal */
+            div#cardOng {
+              display: flex;
+              align-items: center;
+              gap: 16px;
+              width: 100%;
+              max-width: 550px;
+              box-sizing: border-box;
+              margin-top: 18px;
+              padding: 0 8px;
+              font-family: "Inter", sans-serif;
+            }
+
+            div#fotoOng {
+              width: 84px;
+              height: 84px;
+              flex-shrink: 0;
+              overflow: hidden;
+              border: 2px solid #36c3ff;
+              border-radius: 50%;
+              background-color: #eaf8ff;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            div#fotoOng img {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
+            div#fotoOng span {
+              font-size: 32px;
+            }
+
+            div#dadosOng {
+              min-width: 0;
+            }
+
+            div#dadosOng strong {
+              display: block;
+              font-size: 20px;
+              font-weight: 600;
+              overflow-wrap: anywhere;
+            }
+
+            div#dadosOng p {
+              margin: 4px 0 0;
+              color: #555;
+              font-size: 16px;
+            }
+
           /* ================================
-             ALTURA MENOR
+             Altura menor
              ================================ */
 
           @media (max-height: 850px) and (min-width: 901px) {
             header {
               padding: 15px 20px;
-            }
-
-            nav > a > img {
-              width: 65px;
-              height: 55px;
             }
 
             div#container {
@@ -563,11 +590,6 @@ export default function DetalhesAnimal() {
               flex-wrap: wrap;
             }
 
-            nav > a > img {
-              width: 70px;
-              height: 60px;
-            }
-
             div#container {
               flex-direction: column;
 
@@ -614,19 +636,6 @@ export default function DetalhesAnimal() {
           @media (max-width: 600px) {
             header {
               padding: 15px 10px;
-            }
-
-            nav {
-              width: 100%;
-
-              gap: 15px;
-
-              font-size: 13px;
-            }
-
-            nav > a > img {
-              width: 58px;
-              height: 50px;
             }
 
             div#container {
@@ -706,6 +715,23 @@ export default function DetalhesAnimal() {
 
               font-size: 18px;
             }
+
+            div#cardOng {
+              gap: 12px;
+            }
+
+            div#fotoOng {
+              width: 70px;
+              height: 70px;
+            }
+
+            div#dadosOng strong {
+              font-size: 17px;
+            }
+
+            div#dadosOng p {
+              font-size: 14px;
+            }
           }
 
           /* ================================
@@ -713,11 +739,6 @@ export default function DetalhesAnimal() {
              ================================ */
 
           @media (max-width: 400px) {
-            nav {
-              gap: 10px;
-              font-size: 12px;
-            }
-
             div#container {
               padding: 0 10px;
             }
@@ -744,24 +765,7 @@ export default function DetalhesAnimal() {
         `}
       </style>
 
-      <header>
-        <nav>
-          <a href="/login">Entrar</a>
-
-          <a href="/listaadotar">Adotar</a>
-
-          <a href="/">
-            <img
-              src="/imagens/logoMelhor.png"
-              alt="Logo com desenho e escrito"
-            />
-          </a>
-
-          <a href="/#sobre">Sobre</a>
-
-          <a href="/#faq">F.A.Q</a>
-        </nav>
-      </header>
+      <Header homeComoAdotar={ehAdotante} />
 
       <div id="container">
         <div id="containerFotosAnimal">
@@ -792,6 +796,23 @@ export default function DetalhesAnimal() {
               ))}
             </div>
           )}
+          <div id="cardOng">
+            <div id="fotoOng">
+              {animal.fotoPerfilOng ? (
+                <img
+                  src={animal.fotoPerfilOng}
+                  alt={`Foto de ${animal.nomeOng || "ONG responsável"}`}
+                />
+              ) : (
+                <span aria-hidden="true">🐾</span>
+              )}
+            </div>
+
+            <div id="dadosOng">
+              <strong>{animal.nomeOng || "ONG responsável"}</strong>
+              <p>{localizacaoOng}</p>
+            </div>
+          </div>
         </div>
 
         <div id="descricaoAnimal">

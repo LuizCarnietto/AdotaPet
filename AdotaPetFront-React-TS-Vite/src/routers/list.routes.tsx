@@ -13,6 +13,7 @@ import RegistroAnimal from "@/screens/cadastros/RegistroAnimal.tsx";
 import AnimaisCadastrados from "@/screens/cadastros/AnimaisCadastrados.tsx";
 import Candidaturas from "@/screens/formularios/Candidaturas.tsx";
 import MinhasCandidaturas from "@/screens/formularios/MinhasCandidaturas.tsx";
+import PerfilOng from "@/screens/perfil/PerfilOng.tsx";
 
 export const routesList = createBrowserRouter([
   {
@@ -78,5 +79,10 @@ export const routesList = createBrowserRouter([
   {
     path: "/listaadotar/DetalhesAnimal/:id",
     element: <DetalhesAnimal />,
+  },
+
+  {
+    path: "/perfil/PerfilOng",
+    element: <PerfilOng />,
   },
 ]);
