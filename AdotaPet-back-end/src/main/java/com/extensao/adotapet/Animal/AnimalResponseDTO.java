@@ -1,3 +1,4 @@
+
 package com.extensao.adotapet.Animal;
 
 import com.extensao.adotapet.Enum.*;
@@ -22,6 +23,8 @@ public record AnimalResponseDTO(
 
         Long ongId,
         String nomeOng,
+        String fotoPerfilOng,
+        String enderecoOng,
 
         Especie especie,
         Porte porte,
@@ -59,16 +62,35 @@ public record AnimalResponseDTO(
                         ? animal.getCidade().getNome()
                         : null,
 
-                animal.getCidade() != null && animal.getCidade().getEstado() != null
+                animal.getCidade() != null
+                        && animal.getCidade().getEstado() != null
                         ? animal.getCidade().getEstado().getSigla()
                         : null,
 
-                animal.getCidade() != null && animal.getCidade().getEstado() != null
+                animal.getCidade() != null
+                        && animal.getCidade().getEstado() != null
                         ? animal.getCidade().getEstado().getNome()
                         : null,
 
-                animal.getOng().getId(),
-                animal.getOng().getNome(),
+                animal.getOng() != null
+                        ? animal.getOng().getId()
+                        : null,
+
+                animal.getOng() != null
+                        && animal.getOng().getNomeOng() != null
+                        && !animal.getOng().getNomeOng().isBlank()
+                        ? animal.getOng().getNomeOng()
+                        : animal.getOng() != null
+                          ? animal.getOng().getNome()
+                          : null,
+
+                animal.getOng() != null
+                        ? animal.getOng().getFotoPerfil()
+                        : null,
+
+                animal.getOng() != null
+                        ? animal.getOng().getEndereco()
+                        : null,
 
                 animal.getEspecie(),
                 animal.getPorte(),
