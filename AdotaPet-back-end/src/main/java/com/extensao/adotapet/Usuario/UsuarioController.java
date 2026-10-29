@@ -49,7 +49,14 @@ public class UsuarioController {
                 usuario.getTelefone(),
                 usuario.getEndereco(),
                 usuario.getFotoPerfil(),
-                usuario.getDescricaoOng()
+                usuario.getDescricaoOng(),
+                usuario.getEmailInstitucional(),
+                usuario.getEnderecoPublico(),
+                usuario.getInstagram(),
+                usuario.getFacebook(),
+                usuario.getTiktok(),
+                usuario.getTwitter(),
+                usuario.getSite()
         );
     }
 }

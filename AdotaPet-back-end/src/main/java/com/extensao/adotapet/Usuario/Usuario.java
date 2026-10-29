@@ -40,5 +40,26 @@ public class Usuario {
 
     private String cnpj;
     private String descricaoOng;
+
+    @Column(name = "email_institucional")
+    private String emailInstitucional;
+
+    @Column(name = "endereco_publico")
+    private String enderecoPublico;
+
+    @Column(name = "instagram")
+    private String instagram;
+
+    @Column(name = "facebook")
+    private String facebook;
+
+    @Column(name = "tiktok")
+    private String tiktok;
+
+    @Column(name = "twitter")
+    private String twitter;
+
+    @Column(name = "site")
+    private String site;
 }
 

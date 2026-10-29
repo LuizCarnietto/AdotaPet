@@ -10,6 +10,11 @@ import {
   MapPinned,
   ExternalLink,
   HeartHandshake,
+  Instagram,
+  Facebook,
+  Music2,
+  Globe,
+  AtSign,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { apiService } from "@/services/ApiService";
@@ -43,11 +48,30 @@ interface AnimalPerfil {
 interface PerfilOngDados {
   nomeOng?: string | null;
   nome?: string | null;
+
+  // Dados existentes
   email?: string | null;
   telefone?: string | null;
   endereco?: string | null;
   fotoPerfil?: string | null;
   descricaoOng?: string | null;
+
+  // Novos dados públicos
+  emailInstitucional?: string | null;
+  enderecoPublico?: string | null;
+  instagram?: string | null;
+  facebook?: string | null;
+  tiktok?: string | null;
+  twitter?: string | null;
+  site?: string | null;
+}
+
+function normalizarUrl(url?: string | null): string | null {
+  const valor = url?.trim();
+
+  if (!valor) return null;
+
+  return /^https?:\/\//i.test(valor) ? valor : `https://${valor}`;
 }
 
 function obterPrimeiraFoto(fotos: AnimalApi["fotos"]): string {
@@ -109,8 +133,7 @@ function mapearAnimal(animal: AnimalApi): AnimalPerfil {
 export default function PerfilOng() {
   const navigate = useNavigate();
 
-  const [abaAtiva, setAbaAtiva] =
-    useState<AbaAnimais>("DISPONIVEL");
+  const [abaAtiva, setAbaAtiva] = useState<AbaAnimais>("DISPONIVEL");
 
   const [animais, setAnimais] = useState<AnimalPerfil[]>([]);
   const [perfil, setPerfil] = useState<PerfilOngDados | null>(null);
@@ -122,9 +145,7 @@ export default function PerfilOng() {
   const [erroPerfil, setErroPerfil] = useState("");
 
   const nomeOng =
-    perfil?.nomeOng?.trim() ||
-    perfil?.nome?.trim() ||
-    "Perfil da ONG";
+    perfil?.nomeOng?.trim() || perfil?.nome?.trim() || "Perfil da ONG";
 
   const descricaoOng =
     perfil?.descricaoOng?.trim() ||
@@ -222,12 +243,12 @@ export default function PerfilOng() {
     },
     {
       titulo: "E-mail institucional",
-      valor: perfil?.email?.trim() || "Não informado",
+      valor: perfil?.emailInstitucional?.trim() || "Não informado",
       Icone: Mail,
     },
     {
-      titulo: "Endereço",
-      valor: perfil?.endereco?.trim() || "Não informado",
+      titulo: "Endereço público",
+      valor: perfil?.enderecoPublico?.trim() || "Não informado",
       Icone: MapPinned,
     },
   ];
@@ -252,10 +273,7 @@ export default function PerfilOng() {
         await navigator.clipboard.writeText(window.location.href);
         window.alert("Link do perfil copiado para compartilhar!");
       } else {
-        window.prompt(
-          "Copie o link para compartilhar:",
-          window.location.href,
-        );
+        window.prompt("Copie o link para compartilhar:", window.location.href);
       }
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
@@ -263,6 +281,34 @@ export default function PerfilOng() {
       }
     }
   };
+
+  const redesSociais = [
+    {
+      titulo: "Instagram",
+      url: normalizarUrl(perfil?.instagram),
+      Icone: Instagram,
+    },
+    {
+      titulo: "Facebook",
+      url: normalizarUrl(perfil?.facebook),
+      Icone: Facebook,
+    },
+    {
+      titulo: "TikTok",
+      url: normalizarUrl(perfil?.tiktok),
+      Icone: Music2,
+    },
+    {
+      titulo: "Twitter",
+      url: normalizarUrl(perfil?.twitter),
+      Icone: AtSign,
+    },
+    {
+      titulo: "Site oficial",
+      url: normalizarUrl(perfil?.site),
+      Icone: Globe,
+    },
+  ].filter((rede) => Boolean(rede.url));
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#222]">
@@ -304,14 +350,12 @@ export default function PerfilOng() {
               <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <div>
                   <h1 className="text-2xl font-extrabold tracking-tight text-[#222] sm:text-3xl">
-                    {carregandoPerfil
-                      ? "Carregando perfil..."
-                      : nomeOng}
+                    {carregandoPerfil ? "Carregando perfil..." : nomeOng}
                   </h1>
 
                   <p className="mt-1 text-sm font-medium text-gray-500">
-                    {perfil?.endereco?.trim() ||
-                      "Endereço não informado"}
+                    {perfil?.enderecoPublico?.trim() ||
+                      "Localização não informada"}
                   </p>
                 </div>
 
@@ -359,7 +403,6 @@ export default function PerfilOng() {
               >
                 <PawPrint className="h-5 w-5" />
                 Animais disponíveis
-
                 <span className="rounded-full bg-[#EAF8FF] px-2 py-0.5 text-xs font-bold text-[#168fc5]">
                   {totalDisponiveis}
                 </span>
@@ -376,7 +419,6 @@ export default function PerfilOng() {
               >
                 <HeartHandshake className="h-5 w-5" />
                 Animais adotados
-
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
                   {totalAdotados}
                 </span>
@@ -454,7 +496,8 @@ export default function PerfilOng() {
               </h3>
 
               <p className="mt-2 max-w-md text-sm text-gray-500">
-                Quando houver animais cadastrados com este status, eles aparecerão aqui.
+                Quando houver animais cadastrados com este status, eles
+                aparecerão aqui.
               </p>
             </div>
           )}
@@ -509,7 +552,7 @@ export default function PerfilOng() {
 
               <div>
                 <h2 className="text-lg font-bold text-gray-800">
-                  Fale com a ONG
+                  Redes Sociais
                 </h2>
 
                 <p className="text-xs text-gray-500">
@@ -562,7 +605,8 @@ export default function PerfilOng() {
             </h2>
 
             <p className="mt-2 text-sm leading-relaxed text-white/90">
-              Entre em contato para saber como ajudar a ONG nos cuidados e na adoção responsável dos animais.
+              Entre em contato para saber como ajudar a ONG nos cuidados e na
+              adoção responsável dos animais.
             </p>
           </div>
 
@@ -583,13 +627,12 @@ export default function PerfilOng() {
       <footer className="mt-8 border-t border-gray-200 bg-white">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-5 px-6 py-8 text-center sm:flex-row sm:text-left">
           <div>
-            <span className="text-lg font-bold text-[#168fc5]">
-              Adota Pet
-            </span>
+            <span className="text-lg font-bold text-[#168fc5]">Adota Pet</span>
 
             <p className="mt-1 text-xs text-gray-500">
               © 2026 Adota Pet
-              {nomeOng !== "Perfil da ONG" ? ` • ${nomeOng}` : ""}. Todos os direitos reservados.
+              {nomeOng !== "Perfil da ONG" ? ` • ${nomeOng}` : ""}. Todos os
+              direitos reservados.
             </p>
           </div>
 

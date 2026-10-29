@@ -14,6 +14,7 @@ import AnimaisCadastrados from "@/screens/cadastros/AnimaisCadastrados.tsx";
 import Candidaturas from "@/screens/formularios/Candidaturas.tsx";
 import MinhasCandidaturas from "@/screens/formularios/MinhasCandidaturas.tsx";
 import PerfilOng from "@/screens/perfil/PerfilOng.tsx";
+import EditarPerfilOng from "@/screens/editar/EditarPerfilOng.tsx";
 
 export const routesList = createBrowserRouter([
   {
@@ -84,5 +85,9 @@ export const routesList = createBrowserRouter([
   {
     path: "/perfil/PerfilOng",
     element: <PerfilOng />,
+  },
+  {
+    path: "/perfil/EditarPerfilOng",
+    element: <EditarPerfilOng />,
   },
 ]);

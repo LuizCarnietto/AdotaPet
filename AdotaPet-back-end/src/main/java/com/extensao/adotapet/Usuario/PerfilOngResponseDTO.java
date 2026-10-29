@@ -1,4 +1,5 @@
 package com.extensao.adotapet.Usuario;
+
 /**
  * Dados seguros exibidos no perfil da ONG.
  * Não inclui senha, CPF nem outros dados privados do usuário.
@@ -10,6 +11,12 @@ public record PerfilOngResponseDTO(
         String telefone,
         String endereco,
         String fotoPerfil,
-        String descricaoOng
+        String descricaoOng,
+        String emailInstitucional,
+        String enderecoPublico,
+        String instagram,
+        String facebook,
+        String tiktok,
+        String twitter,
+        String site
 ) {}
-
