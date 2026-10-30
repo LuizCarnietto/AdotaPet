@@ -43,6 +43,12 @@ public class AuthService {
 
         if (usuario.getTipoUsuario() == TipoUsuario.ROLE_ONG) {
 
+            if (usuario.getNomeOng() == null || usuario.getNomeOng().isBlank()) {
+                throw new ValidationException("Nome da ONG obrigatório");
+            }
+
+            usuario.setNomeOng(usuario.getNomeOng().trim());
+
             if (usuario.getCnpj() == null || usuario.getCnpj().isBlank()) {
                 throw new ValidationException("CNPJ obrigatório para ONG");
             }

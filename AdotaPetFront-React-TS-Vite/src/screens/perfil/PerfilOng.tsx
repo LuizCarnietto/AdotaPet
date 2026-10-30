@@ -10,11 +10,6 @@ import {
   MapPinned,
   ExternalLink,
   HeartHandshake,
-  Instagram,
-  Facebook,
-  Music2,
-  Globe,
-  AtSign,
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { apiService } from "@/services/ApiService";
@@ -48,30 +43,91 @@ interface AnimalPerfil {
 interface PerfilOngDados {
   nomeOng?: string | null;
   nome?: string | null;
-
-  // Dados existentes
   email?: string | null;
   telefone?: string | null;
   endereco?: string | null;
   fotoPerfil?: string | null;
   descricaoOng?: string | null;
-
-  // Novos dados públicos
-  emailInstitucional?: string | null;
-  enderecoPublico?: string | null;
-  instagram?: string | null;
-  facebook?: string | null;
-  tiktok?: string | null;
-  twitter?: string | null;
-  site?: string | null;
+  cidade?: string | null;
+  estado?: string | null;
+  estadoSigla?: string | null;
+  uf?: string | null;
+  localizacao?: string | null;
+  cnpj?: string | null;
 }
 
-function normalizarUrl(url?: string | null): string | null {
-  const valor = url?.trim();
+const ESTADOS_POR_SIGLA: Record<string, string> = {
+  AC: "Acre",
+  AL: "Alagoas",
+  AP: "Amapá",
+  AM: "Amazonas",
+  BA: "Bahia",
+  CE: "Ceará",
+  DF: "Distrito Federal",
+  ES: "Espírito Santo",
+  GO: "Goiás",
+  MA: "Maranhão",
+  MT: "Mato Grosso",
+  MS: "Mato Grosso do Sul",
+  MG: "Minas Gerais",
+  PA: "Pará",
+  PB: "Paraíba",
+  PR: "Paraná",
+  PE: "Pernambuco",
+  PI: "Piauí",
+  RJ: "Rio de Janeiro",
+  RN: "Rio Grande do Norte",
+  RS: "Rio Grande do Sul",
+  RO: "Rondônia",
+  RR: "Roraima",
+  SC: "Santa Catarina",
+  SP: "São Paulo",
+  SE: "Sergipe",
+  TO: "Tocantins",
+};
 
-  if (!valor) return null;
+function formatarNomeEstado(estado?: string | null): string {
+  const valor = estado?.trim();
+  if (!valor) return "";
 
-  return /^https?:\/\//i.test(valor) ? valor : `https://${valor}`;
+  return ESTADOS_POR_SIGLA[valor.toUpperCase()] || valor;
+}
+
+function obterLocalizacaoOng(perfil: PerfilOngDados | null): string {
+  if (!perfil) return "Localização não informada";
+
+  const cidade = perfil.cidade?.trim();
+  const estado = formatarNomeEstado(
+    perfil.estado || perfil.estadoSigla || perfil.uf,
+  );
+
+  if (cidade || estado) {
+    return [cidade, estado].filter(Boolean).join(", ");
+  }
+
+  // Aceita também uma localização já formatada, caso a API retorne esse campo.
+  const localizacao = perfil.localizacao?.trim();
+  if (localizacao) {
+    const partes = localizacao.split(",").map((parte) => parte.trim());
+    if (partes.length >= 2) {
+      return `${partes[0]}, ${formatarNomeEstado(partes[1])}`;
+    }
+    return localizacao;
+  }
+
+  return "Localização não informada";
+}
+
+function formatarCnpj(cnpj?: string | null): string {
+  if (!cnpj?.trim()) return "";
+
+  const digitos = cnpj.replace(/\D/g, "");
+  if (digitos.length !== 14) return cnpj.trim();
+
+  return digitos.replace(
+    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+    "$1.$2.$3/$4-$5",
+  );
 }
 
 function obterPrimeiraFoto(fotos: AnimalApi["fotos"]): string {
@@ -133,7 +189,8 @@ function mapearAnimal(animal: AnimalApi): AnimalPerfil {
 export default function PerfilOng() {
   const navigate = useNavigate();
 
-  const [abaAtiva, setAbaAtiva] = useState<AbaAnimais>("DISPONIVEL");
+  const [abaAtiva, setAbaAtiva] =
+    useState<AbaAnimais>("DISPONIVEL");
 
   const [animais, setAnimais] = useState<AnimalPerfil[]>([]);
   const [perfil, setPerfil] = useState<PerfilOngDados | null>(null);
@@ -143,13 +200,22 @@ export default function PerfilOng() {
 
   const [erroAnimais, setErroAnimais] = useState("");
   const [erroPerfil, setErroPerfil] = useState("");
+  const [erroFotoPerfil, setErroFotoPerfil] = useState(false);
 
   const nomeOng =
-    perfil?.nomeOng?.trim() || perfil?.nome?.trim() || "Perfil da ONG";
+    perfil?.nomeOng?.trim() ||
+    perfil?.nome?.trim() ||
+    "Perfil da ONG";
 
   const descricaoOng =
     perfil?.descricaoOng?.trim() ||
     "Esta ONG ainda não adicionou uma descrição ao perfil.";
+  const localizacaoOng = obterLocalizacaoOng(perfil);
+  const cnpjOng = formatarCnpj(perfil?.cnpj);
+  const identificacaoOng = [
+    localizacaoOng,
+    cnpjOng ? `CNPJ ${cnpjOng}` : "CNPJ não informado",
+  ].join(" • ");
 
   useEffect(() => {
     let cancelado = false;
@@ -198,6 +264,7 @@ export default function PerfilOng() {
 
         if (!cancelado) {
           setPerfil(response.data as PerfilOngDados);
+          setErroFotoPerfil(false);
         }
       } catch (error) {
         console.error("Erro ao carregar perfil da ONG:", error);
@@ -243,12 +310,12 @@ export default function PerfilOng() {
     },
     {
       titulo: "E-mail institucional",
-      valor: perfil?.emailInstitucional?.trim() || "Não informado",
+      valor: perfil?.email?.trim() || "Não informado",
       Icone: Mail,
     },
     {
-      titulo: "Endereço público",
-      valor: perfil?.enderecoPublico?.trim() || "Não informado",
+      titulo: "Endereço",
+      valor: perfil?.endereco?.trim() || "Não informado",
       Icone: MapPinned,
     },
   ];
@@ -273,7 +340,10 @@ export default function PerfilOng() {
         await navigator.clipboard.writeText(window.location.href);
         window.alert("Link do perfil copiado para compartilhar!");
       } else {
-        window.prompt("Copie o link para compartilhar:", window.location.href);
+        window.prompt(
+          "Copie o link para compartilhar:",
+          window.location.href,
+        );
       }
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
@@ -281,34 +351,6 @@ export default function PerfilOng() {
       }
     }
   };
-
-  const redesSociais = [
-    {
-      titulo: "Instagram",
-      url: normalizarUrl(perfil?.instagram),
-      Icone: Instagram,
-    },
-    {
-      titulo: "Facebook",
-      url: normalizarUrl(perfil?.facebook),
-      Icone: Facebook,
-    },
-    {
-      titulo: "TikTok",
-      url: normalizarUrl(perfil?.tiktok),
-      Icone: Music2,
-    },
-    {
-      titulo: "Twitter",
-      url: normalizarUrl(perfil?.twitter),
-      Icone: AtSign,
-    },
-    {
-      titulo: "Site oficial",
-      url: normalizarUrl(perfil?.site),
-      Icone: Globe,
-    },
-  ].filter((rede) => Boolean(rede.url));
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#222]">
@@ -331,11 +373,12 @@ export default function PerfilOng() {
           <div className="relative z-10 flex flex-col items-center gap-8 md:flex-row md:items-start">
             <div className="shrink-0 rounded-full bg-gradient-to-br from-[#36c3ff] to-[#178fc4] p-1 shadow-sm">
               <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-white p-1 sm:h-40 sm:w-40">
-                {perfil?.fotoPerfil ? (
+                {perfil?.fotoPerfil?.trim() && !erroFotoPerfil ? (
                   <img
-                    alt={`Logo de ${nomeOng}`}
+                    alt={`Foto de perfil de ${nomeOng}`}
                     className="h-full w-full rounded-full object-cover"
                     src={perfil.fotoPerfil}
+                    onError={() => setErroFotoPerfil(true)}
                   />
                 ) : (
                   <PawPrint
@@ -350,19 +393,21 @@ export default function PerfilOng() {
               <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <div>
                   <h1 className="text-2xl font-extrabold tracking-tight text-[#222] sm:text-3xl">
-                    {carregandoPerfil ? "Carregando perfil..." : nomeOng}
+                    {carregandoPerfil
+                      ? "Carregando perfil..."
+                      : nomeOng}
                   </h1>
 
-                  <p className="mt-1 text-sm font-medium text-gray-500">
-                    {perfil?.enderecoPublico?.trim() ||
-                      "Localização não informada"}
+                  <p className="mt-2 flex items-center justify-center gap-1.5 text-sm font-medium text-gray-500 md:justify-start">
+                    <MapPin className="h-4 w-4 shrink-0 text-[#36c3ff]" aria-hidden="true" />
+                    <span>{identificacaoOng}</span>
                   </p>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2.5 md:justify-start">
                   <button
                     type="button"
-                    onClick={() => navigate("/perfil")}
+                    onClick={() => navigate("/perfil/EditarPerfilOng")}
                     className="inline-flex items-center gap-2 rounded-[20px] border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-[#36c3ff] hover:bg-[#EAF8FF] hover:text-[#168fc5] active:scale-[0.98]"
                   >
                     <Pencil className="h-4 w-4" />
@@ -403,6 +448,7 @@ export default function PerfilOng() {
               >
                 <PawPrint className="h-5 w-5" />
                 Animais disponíveis
+
                 <span className="rounded-full bg-[#EAF8FF] px-2 py-0.5 text-xs font-bold text-[#168fc5]">
                   {totalDisponiveis}
                 </span>
@@ -419,6 +465,7 @@ export default function PerfilOng() {
               >
                 <HeartHandshake className="h-5 w-5" />
                 Animais adotados
+
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
                   {totalAdotados}
                 </span>
@@ -496,8 +543,7 @@ export default function PerfilOng() {
               </h3>
 
               <p className="mt-2 max-w-md text-sm text-gray-500">
-                Quando houver animais cadastrados com este status, eles
-                aparecerão aqui.
+                Quando houver animais cadastrados com este status, eles aparecerão aqui.
               </p>
             </div>
           )}
@@ -605,8 +651,7 @@ export default function PerfilOng() {
             </h2>
 
             <p className="mt-2 text-sm leading-relaxed text-white/90">
-              Entre em contato para saber como ajudar a ONG nos cuidados e na
-              adoção responsável dos animais.
+              Entre em contato para saber como ajudar a ONG nos cuidados e na adoção responsável dos animais.
             </p>
           </div>
 
@@ -627,12 +672,13 @@ export default function PerfilOng() {
       <footer className="mt-8 border-t border-gray-200 bg-white">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-5 px-6 py-8 text-center sm:flex-row sm:text-left">
           <div>
-            <span className="text-lg font-bold text-[#168fc5]">Adota Pet</span>
+            <span className="text-lg font-bold text-[#168fc5]">
+              Adota Pet
+            </span>
 
             <p className="mt-1 text-xs text-gray-500">
               © 2026 Adota Pet
-              {nomeOng !== "Perfil da ONG" ? ` • ${nomeOng}` : ""}. Todos os
-              direitos reservados.
+              {nomeOng !== "Perfil da ONG" ? ` • ${nomeOng}` : ""}. Todos os direitos reservados.
             </p>
           </div>
 

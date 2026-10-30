@@ -19,6 +19,8 @@ public class UsuarioController {
     @PostMapping
     public Usuario cadastrar(@RequestBody UsuarioRequestDTO data) {
         Usuario usuario = new Usuario();
+
+        usuario.setNomeOng(data.nomeOng());
         usuario.setNome(data.nome());
         usuario.setEmail(data.email());
         usuario.setSenha(data.senha());
@@ -26,6 +28,7 @@ public class UsuarioController {
         usuario.setCpf(data.cpf());
         usuario.setDataNascimento(data.dataNascimento());
         usuario.setTipoUsuario(data.tipoUsuario());
+
         return repository.save(usuario);
     }
 
@@ -35,12 +38,15 @@ public class UsuarioController {
      */
     @GetMapping("/perfil")
     public PerfilOngResponseDTO buscarPerfil(Authentication authentication) {
-        if (authentication == null || authentication.getName() == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não autenticado");
-        }
 
-        Usuario usuario = repository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuário não encontrado"));
+        if (authentication == null ||
+                !(authentication.getPrincipal() instanceof Usuario usuario)) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Usuário não autenticado"
+            );
+        }
 
         return new PerfilOngResponseDTO(
                 usuario.getNomeOng(),

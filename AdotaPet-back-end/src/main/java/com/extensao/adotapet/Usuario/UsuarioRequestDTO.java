@@ -1,10 +1,10 @@
 package com.extensao.adotapet.Usuario;
 
 import com.extensao.adotapet.Enum.TipoUsuario;
-
 import java.time.LocalDate;
 
 public record UsuarioRequestDTO(
+        String nomeOng,
         String nome,
         String email,
         String senha,
