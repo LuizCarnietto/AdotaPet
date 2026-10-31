@@ -11,6 +11,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -29,34 +30,40 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
+
                 .authorizeHttpRequests(auth -> auth
 
-                        // público: login
+                        // Público: login
                         .requestMatchers("/auth/**").permitAll()
 
-                        // público: cadastro de usuário
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.POST,"/usuario").permitAll()
+                        // Público: cadastro de usuário
+                        .requestMatchers(HttpMethod.POST, "/usuario").permitAll()
 
-                        // somente ONG lista seus animais
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.GET,"/animal/ong").hasAuthority("ROLE_ONG")
+                        // Público: perfil de uma ONG específica
+                        .requestMatchers(HttpMethod.GET, "/usuario/ong/**").permitAll()
 
-                        // público: visualização de animais
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.GET,"/animal/**").permitAll()
+                        // Somente a ONG autenticada lista seus próprios animais
+                        .requestMatchers(HttpMethod.GET, "/animal/ong").hasAuthority("ROLE_ONG")
 
-                        // somente ONG cadastra animal
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.POST,"/animal").hasAuthority("ROLE_ONG")
+                        // Público: animais de uma ONG específica
+                        .requestMatchers(HttpMethod.GET, "/animal/ong/*").permitAll()
 
-                        // somente ONG exclui animal
-                        .requestMatchers(
-                                org.springframework.http.HttpMethod.DELETE, "/animal/**").hasAuthority("ROLE_ONG")
+                        // Público: visualização de animais
+                        .requestMatchers(HttpMethod.GET, "/animal/**").permitAll()
 
-                        // tudo o resto precisa login
+                        // Somente ONG cadastra animal
+                        .requestMatchers(HttpMethod.POST, "/animal").hasAuthority("ROLE_ONG")
+
+                        // Somente ONG exclui animal
+                        .requestMatchers(HttpMethod.DELETE, "/animal/**").hasAuthority("ROLE_ONG")
+
+                        // Público: imagens
+                        .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
+
+                        // Todo o restante exige autenticação
                         .anyRequest().authenticated()
                 )
+
 
                 .exceptionHandling(ex -> ex
 
@@ -108,5 +115,6 @@ public class SecurityConfig {
 
         return source;
     }
+
 
 }

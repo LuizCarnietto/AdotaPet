@@ -83,6 +83,10 @@ export const routesList = createBrowserRouter([
   },
 
   {
+    path: "/ong/:ongId",
+    element: <PerfilOng />,
+  },
+  {
     path: "/perfil/PerfilOng",
     element: <PerfilOng />,
   },

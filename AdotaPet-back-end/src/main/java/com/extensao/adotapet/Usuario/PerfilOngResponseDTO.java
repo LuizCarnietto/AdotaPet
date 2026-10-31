@@ -11,9 +11,23 @@ public record PerfilOngResponseDTO(
         String telefone,
         String endereco,
         String fotoPerfil,
+        String fotoCapa,
+        String cnpj,
         String descricaoOng,
         String emailInstitucional,
         String enderecoPublico,
+
+        Long estadoId,
+        Long cidadeId,
+        String estado,
+        String estadoSigla,
+        String cidade,
+
+        boolean pixAtivo,
+        String tipoChavePix,
+        String chavePix,
+        String titularPix,
+
         String instagram,
         String facebook,
         String tiktok,

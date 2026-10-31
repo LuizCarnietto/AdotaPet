@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import { apiService } from "@/services/ApiService";
 import { Header } from "@/components/Header";
 
@@ -166,7 +166,48 @@ export default function DetalhesAnimal() {
         : animal.cidade || "Não informado";
 
   const localizacaoOng =
-    animal.enderecoOng?.trim() || "Localização não informada";
+    [animal.cidadeOng?.trim(), animal.estadoSiglaOng?.trim()]
+      .filter(Boolean)
+      .join(" - ") || "Localização não informada";
+
+  function resolverUrlImagem(caminho?: string | null): string {
+    if (!caminho) return "";
+
+    // Se já for uma URL completa, mantém como está.
+    if (/^(https?:|blob:|data:)/i.test(caminho)) {
+      return caminho;
+    }
+
+    const baseURL = apiService.defaults.baseURL;
+
+    if (!baseURL) return caminho;
+
+    const caminhoNormalizado = caminho.startsWith("/")
+      ? caminho
+      : `/${caminho}`;
+
+    return new URL(caminhoNormalizado, baseURL).toString();
+  }
+
+  const conteudoCardOng = (
+    <>
+      <div id="fotoOng">
+        {animal.fotoPerfilOng ? (
+          <img
+            src={resolverUrlImagem(animal.fotoPerfilOng)}
+            alt={`Foto de ${animal.nomeOng || "ONG responsável"}`}
+          />
+        ) : (
+          <span aria-hidden="true">🐾</span>
+        )}
+      </div>
+
+      <div id="dadosOng">
+        <strong>{animal.nomeOng || "ONG responsável"}</strong>
+        <p>{localizacaoOng}</p>
+      </div>
+    </>
+  );
 
   return (
     <>
@@ -431,7 +472,28 @@ export default function DetalhesAnimal() {
             text-decoration: none;
           }
 
-          
+          .linkCardOng {
+            display: block;
+            width: 100%;
+            max-width: 550px;
+            color: inherit;
+            text-decoration: none;
+          }
+
+          #cardOng {
+            transition: transform 0.2s ease;
+          }
+
+          .linkCardOng:hover #cardOng {
+            cursor: pointer;
+            transform: translateY(-2px);
+          }
+
+          .linkCardOng:focus-visible {
+            outline: 3px solid #36c3ff;
+            outline-offset: 5px;
+            border-radius: 14px;
+          }
 
           /* ================================
              NOTEBOOK / TELAS MENORES
@@ -797,21 +859,17 @@ export default function DetalhesAnimal() {
             </div>
           )}
           <div id="cardOng">
-            <div id="fotoOng">
-              {animal.fotoPerfilOng ? (
-                <img
-                  src={animal.fotoPerfilOng}
-                  alt={`Foto de ${animal.nomeOng || "ONG responsável"}`}
-                />
-              ) : (
-                <span aria-hidden="true">🐾</span>
-              )}
-            </div>
-
-            <div id="dadosOng">
-              <strong>{animal.nomeOng || "ONG responsável"}</strong>
-              <p>{localizacaoOng}</p>
-            </div>
+            {animal.ongId ? (
+              <Link
+                to={`/ong/${animal.ongId}`}
+                className="linkCardOng"
+                aria-label={`Ver perfil da ONG ${animal.nomeOng || "responsável"}`}
+              >
+                <div id="cardOng">{conteudoCardOng}</div>
+              </Link>
+            ) : (
+              <div id="cardOng">{conteudoCardOng}</div>
+            )}
           </div>
         </div>
 

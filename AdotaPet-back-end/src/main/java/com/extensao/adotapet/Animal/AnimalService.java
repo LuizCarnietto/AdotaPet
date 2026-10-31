@@ -452,4 +452,18 @@ public class AnimalService {
                 .map(AnimalResponseDTO::new)
                 .toList();
     }
+
+
+    public List<AnimalResponseDTO> listarAnimaisDaOng(Long ongId) {
+
+        Usuario ong = usuarioRepository.findById(ongId)
+                .filter(usuario ->
+                        TipoUsuario.ROLE_ONG.equals(usuario.getTipoUsuario())
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("ONG não encontrada")
+                );
+
+        return listarAnimaisDaOng(ong);
+    }
 }

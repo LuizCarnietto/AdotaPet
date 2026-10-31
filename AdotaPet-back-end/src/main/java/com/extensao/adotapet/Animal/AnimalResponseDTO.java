@@ -25,6 +25,8 @@ public record AnimalResponseDTO(
         String nomeOng,
         String fotoPerfilOng,
         String enderecoOng,
+        String cidadeOng,
+        String estadoSiglaOng,
 
         Especie especie,
         Porte porte,
@@ -90,6 +92,16 @@ public record AnimalResponseDTO(
 
                 animal.getOng() != null
                         ? animal.getOng().getEndereco()
+                        : null,
+
+                // Cidade da ONG
+                animal.getOng() != null
+                        ? animal.getOng().getCidade()
+                        : null,
+
+                // Sigla do estado da ONG
+                animal.getOng() != null
+                        ? animal.getOng().getEstadoSigla()
                         : null,
 
                 animal.getEspecie(),

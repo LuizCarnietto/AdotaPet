@@ -64,5 +64,35 @@ public class Usuario {
 
     @Column(name = "site")
     private String site;
+
+    @Column(name = "foto_capa")
+    private String fotoCapa;
+
+    @Column(name = "estado_id")
+    private Long estadoId;
+
+    @Column(name = "cidade_id")
+    private Long cidadeId;
+
+    @Column(name = "estado")
+    private String estado;
+
+    @Column(name = "estado_sigla")
+    private String estadoSigla;
+
+    @Column(name = "cidade")
+    private String cidade;
+
+    @Column(name = "pix_ativo", nullable = false)
+    private boolean pixAtivo;
+
+    @Column(name = "tipo_chave_pix")
+    private String tipoChavePix;
+
+    @Column(name = "chave_pix")
+    private String chavePix;
+
+    @Column(name = "titular_pix")
+    private String titularPix;
 }
 

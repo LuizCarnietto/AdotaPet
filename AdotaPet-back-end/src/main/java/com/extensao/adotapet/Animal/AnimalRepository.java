@@ -9,4 +9,5 @@ import java.util.List;
 public interface AnimalRepository extends JpaRepository<Animal, Long>,
         JpaSpecificationExecutor<Animal> {
     List<Animal> findByOngOrderByIdDesc(Usuario ong);
+    List<Animal> findByOng_IdOrderByIdDesc(Long ongId);
 }

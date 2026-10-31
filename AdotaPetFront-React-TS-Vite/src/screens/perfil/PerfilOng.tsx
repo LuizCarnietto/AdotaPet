@@ -1,5 +1,6 @@
+
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   PawPrint,
   MapPin,
@@ -86,8 +87,33 @@ const ESTADOS_POR_SIGLA: Record<string, string> = {
   TO: "Tocantins",
 };
 
+function resolverUrlImagem(caminho?: string | null): string {
+  if (!caminho) return "";
+
+  if (/^(https?:|blob:|data:)/i.test(caminho)) {
+    return caminho;
+  }
+
+  const baseURL = apiService.defaults.baseURL;
+
+  if (!baseURL) {
+    return caminho;
+  }
+
+  const caminhoNormalizado = caminho.startsWith("/")
+    ? caminho
+    : `/${caminho}`;
+
+  try {
+    return new URL(caminhoNormalizado, baseURL).toString();
+  } catch {
+    return caminho;
+  }
+}
+
 function formatarNomeEstado(estado?: string | null): string {
   const valor = estado?.trim();
+
   if (!valor) return "";
 
   return ESTADOS_POR_SIGLA[valor.toUpperCase()] || valor;
@@ -97,6 +123,7 @@ function obterLocalizacaoOng(perfil: PerfilOngDados | null): string {
   if (!perfil) return "Localização não informada";
 
   const cidade = perfil.cidade?.trim();
+
   const estado = formatarNomeEstado(
     perfil.estado || perfil.estadoSigla || perfil.uf,
   );
@@ -105,13 +132,15 @@ function obterLocalizacaoOng(perfil: PerfilOngDados | null): string {
     return [cidade, estado].filter(Boolean).join(", ");
   }
 
-  // Aceita também uma localização já formatada, caso a API retorne esse campo.
   const localizacao = perfil.localizacao?.trim();
+
   if (localizacao) {
     const partes = localizacao.split(",").map((parte) => parte.trim());
+
     if (partes.length >= 2) {
       return `${partes[0]}, ${formatarNomeEstado(partes[1])}`;
     }
+
     return localizacao;
   }
 
@@ -122,6 +151,7 @@ function formatarCnpj(cnpj?: string | null): string {
   if (!cnpj?.trim()) return "";
 
   const digitos = cnpj.replace(/\D/g, "");
+
   if (digitos.length !== 14) return cnpj.trim();
 
   return digitos.replace(
@@ -152,7 +182,7 @@ function obterPrimeiraFoto(fotos: AnimalApi["fotos"]): string {
       return parseado;
     }
   } catch {
-    // O backend também pode devolver uma URL diretamente.
+    // A API também pode devolver uma URL diretamente.
   }
 
   return valor;
@@ -186,8 +216,30 @@ function mapearAnimal(animal: AnimalApi): AnimalPerfil {
   };
 }
 
+function extrairListaAnimais(dados: unknown): AnimalApi[] {
+  if (Array.isArray(dados)) {
+    return dados as AnimalApi[];
+  }
+
+  if (
+    dados &&
+    typeof dados === "object" &&
+    "content" in dados &&
+    Array.isArray(dados.content)
+  ) {
+    return dados.content as AnimalApi[];
+  }
+
+  return [];
+}
+
 export default function PerfilOng() {
   const navigate = useNavigate();
+
+  const { ongId } = useParams<{ ongId: string }>();
+
+  // Se existe ongId na URL, estamos visualizando o perfil público.
+  const perfilPublico = Boolean(ongId);
 
   const [abaAtiva, setAbaAtiva] =
     useState<AbaAnimais>("DISPONIVEL");
@@ -210,8 +262,11 @@ export default function PerfilOng() {
   const descricaoOng =
     perfil?.descricaoOng?.trim() ||
     "Esta ONG ainda não adicionou uma descrição ao perfil.";
+
   const localizacaoOng = obterLocalizacaoOng(perfil);
+
   const cnpjOng = formatarCnpj(perfil?.cnpj);
+
   const identificacaoOng = [
     localizacaoOng,
     cnpjOng ? `CNPJ ${cnpjOng}` : "CNPJ não informado",
@@ -220,32 +275,34 @@ export default function PerfilOng() {
   useEffect(() => {
     let cancelado = false;
 
+    // Limpa os dados anteriores quando o ID da ONG mudar.
+    setPerfil(null);
+    setAnimais([]);
+    setErroPerfil("");
+    setErroAnimais("");
+    setErroFotoPerfil(false);
+
     async function carregarAnimais() {
       setCarregandoAnimais(true);
-      setErroAnimais("");
 
       try {
-        const response = await apiService.get("/animal/ong");
-        const dados: unknown = response.data;
+        const endpointAnimais = perfilPublico
+          ? `/animal/ong/${ongId}`
+          : "/animal/ong";
 
-        const lista = Array.isArray(dados)
-          ? dados
-          : dados &&
-              typeof dados === "object" &&
-              "content" in dados &&
-              Array.isArray(dados.content)
-            ? dados.content
-            : [];
+        const response = await apiService.get(endpointAnimais);
+
+        const lista = extrairListaAnimais(response.data);
 
         if (!cancelado) {
-          setAnimais((lista as AnimalApi[]).map(mapearAnimal));
+          setAnimais(lista.map(mapearAnimal));
         }
       } catch (error) {
         console.error("Erro ao carregar animais da ONG:", error);
 
         if (!cancelado) {
           setErroAnimais(
-            "Não foi possível carregar os animais. Verifique se você está conectado como ONG e tente novamente.",
+            "Não foi possível carregar os animais desta ONG.",
           );
         }
       } finally {
@@ -257,21 +314,23 @@ export default function PerfilOng() {
 
     async function carregarPerfil() {
       setCarregandoPerfil(true);
-      setErroPerfil("");
 
       try {
-        const response = await apiService.get("/usuario/perfil");
+        const endpointPerfil = perfilPublico
+          ? `/usuario/ong/${ongId}`
+          : "/usuario/perfil";
+
+        const response = await apiService.get(endpointPerfil);
 
         if (!cancelado) {
           setPerfil(response.data as PerfilOngDados);
-          setErroFotoPerfil(false);
         }
       } catch (error) {
         console.error("Erro ao carregar perfil da ONG:", error);
 
         if (!cancelado) {
           setErroPerfil(
-            "Não foi possível carregar os dados do perfil. Confira se o endpoint GET /usuario/perfil foi adicionado ao backend.",
+            "Não foi possível carregar os dados do perfil da ONG.",
           );
         }
       } finally {
@@ -287,7 +346,7 @@ export default function PerfilOng() {
     return () => {
       cancelado = true;
     };
-  }, []);
+  }, [ongId, perfilPublico]);
 
   const animaisFiltrados = useMemo(
     () => animais.filter((animal) => animal.status === abaAtiva),
@@ -377,7 +436,7 @@ export default function PerfilOng() {
                   <img
                     alt={`Foto de perfil de ${nomeOng}`}
                     className="h-full w-full rounded-full object-cover"
-                    src={perfil.fotoPerfil}
+                    src={resolverUrlImagem(perfil.fotoPerfil)}
                     onError={() => setErroFotoPerfil(true)}
                   />
                 ) : (
@@ -399,20 +458,25 @@ export default function PerfilOng() {
                   </h1>
 
                   <p className="mt-2 flex items-center justify-center gap-1.5 text-sm font-medium text-gray-500 md:justify-start">
-                    <MapPin className="h-4 w-4 shrink-0 text-[#36c3ff]" aria-hidden="true" />
+                    <MapPin
+                      className="h-4 w-4 shrink-0 text-[#36c3ff]"
+                      aria-hidden="true"
+                    />
                     <span>{identificacaoOng}</span>
                   </p>
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-2.5 md:justify-start">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/perfil/EditarPerfilOng")}
-                    className="inline-flex items-center gap-2 rounded-[20px] border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-[#36c3ff] hover:bg-[#EAF8FF] hover:text-[#168fc5] active:scale-[0.98]"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Editar perfil
-                  </button>
+                  {!perfilPublico && (
+                    <button
+                      type="button"
+                      onClick={() => navigate("/perfil/EditarPerfilOng")}
+                      className="inline-flex items-center gap-2 rounded-[20px] border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-[#36c3ff] hover:bg-[#EAF8FF] hover:text-[#168fc5] active:scale-[0.98]"
+                    >
+                      <Pencil className="h-4 w-4" />
+                      Editar perfil
+                    </button>
+                  )}
 
                   <button
                     type="button"
@@ -497,7 +561,7 @@ export default function PerfilOng() {
                       {animal.foto ? (
                         <img
                           alt={`${animal.especie} ${animal.nome}`}
-                          src={animal.foto}
+                          src={resolverUrlImagem(animal.foto)}
                           loading="lazy"
                           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                         />

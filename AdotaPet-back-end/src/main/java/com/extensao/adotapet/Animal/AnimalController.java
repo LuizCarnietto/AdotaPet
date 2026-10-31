@@ -47,6 +47,13 @@ public class AnimalController {
         return animalService.listarAnimaisDaOng(ong);
     }
 
+    @GetMapping("/ong/{ongId}")
+    public List<AnimalResponseDTO> listarAnimaisDeUmaOng(
+            @PathVariable Long ongId
+    ) {
+        return animalService.listarAnimaisDaOng(ongId);
+    }
+
     @GetMapping("/{id}")
     public AnimalResponseDTO getById(
             @PathVariable Long id

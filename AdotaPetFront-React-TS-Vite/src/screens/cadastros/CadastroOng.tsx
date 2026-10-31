@@ -614,7 +614,7 @@ export default function CadastroOng() {
                 />
 
                 {/* Telefone */}
-                <label htmlFor="telefone">Telefone com WhatsApp</label>
+                <label htmlFor="telefone">Telefone com WhatsApp da ONG</label>
                 <input
                   type="tel"
                   name="telefone"

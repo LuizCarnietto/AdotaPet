@@ -46,7 +46,6 @@ type PerfilOngForm = {
   tiktok: string;
   twitter: string;
   site: string;
-  whatsapp: string;
 };
 
 type PerfilOngApi = Partial<PerfilOngForm> & {
@@ -79,7 +78,6 @@ const FORMULARIO_VAZIO: PerfilOngForm = {
   tiktok: "",
   twitter: "",
   site: "",
-  whatsapp: "",
 };
 
 const inputClass =
@@ -125,6 +123,22 @@ function formatarCNPJ(valor: string) {
 }
 const somenteNumeros = (valor: string) => valor.replace(/\D/g, "");
 
+function formatarTelefone(valor: string) {
+  const numeros = valor.replace(/\D/g, "").slice(0, 11);
+
+  if (numeros.length <= 2) {
+    return numeros;
+  }
+
+  if (numeros.length <= 10) {
+    return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 6)}${
+      numeros.length > 6 ? `-${numeros.slice(6)}` : ""
+    }`;
+  }
+
+  return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`;
+}
+
 export default function EditarPerfilOng() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState(FORMULARIO_VAZIO);
@@ -148,6 +162,7 @@ export default function EditarPerfilOng() {
   const [hasChanges, setHasChanges] = useState(false);
   const profileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const [salvando, setSalvando] = useState(false);
 
   // Busca os dados existentes. Os campos ainda não devolvidos pelo DTO ficam vazios.
   useEffect(() => {
@@ -173,12 +188,11 @@ export default function EditarPerfilOng() {
           tiktok: dados.tiktok || "",
           twitter: dados.twitter || "",
           site: dados.site || "",
-          whatsapp: dados.whatsapp || "",
         };
         if (ativo) {
           setPerfilOriginal(dados);
           setFormData(carregado);
-          setProfilePhoto(dados.fotoPerfil || null);
+          setProfilePhoto(resolverUrlFoto(dados.fotoPerfil));
           setCoverPhoto(dados.fotoCapa || dados.capa || null);
         }
       } catch (error) {
@@ -300,8 +314,8 @@ export default function EditarPerfilOng() {
   ) => {
     const arquivo = event.target.files?.[0];
     if (!arquivo) return;
-    if (!arquivo.type.startsWith("image/")) {
-      window.alert("Selecione um arquivo de imagem válido.");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(arquivo.type)) {
+      window.alert("Selecione uma imagem JPG, PNG ou WEBP.");
       event.target.value = "";
       return;
     }
@@ -357,7 +371,6 @@ export default function EditarPerfilOng() {
       formData.tiktok,
       formData.twitter,
       formData.site,
-      formData.whatsapp,
     ].some((v) => v.trim());
     return Boolean(
       formData.nomeOng.trim() &&
@@ -375,9 +388,14 @@ export default function EditarPerfilOng() {
     );
   }, [formData, estadoId, cidadeId, profilePhoto, coverPhoto]);
 
-  // Sem endpoint de atualização confirmado, não simula um salvamento no banco.
-  const prepararDados = (event: FormEvent<HTMLFormElement>) => {
+  const salvarPerfil = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (!estadoId || !cidadeId) {
+      setMensagemSalvar("Selecione o estado e a cidade.");
+      return;
+    }
+
     const payload = {
       nomeOng: formData.nomeOng.trim(),
       cnpj: somenteNumeros(formData.cnpj),
@@ -385,26 +403,110 @@ export default function EditarPerfilOng() {
       telefone: somenteNumeros(formData.telefone),
       emailInstitucional: formData.emailInstitucional.trim(),
       enderecoPublico: formData.enderecoPublico.trim(),
-      cidade: cidadeSelecionada?.nome || "",
+      estadoId: Number(estadoId),
+      cidadeId: Number(cidadeId),
       estado: estadoSelecionado?.nome || "",
       estadoSigla: estadoSelecionado?.sigla || "",
+      cidade: cidadeSelecionada?.nome || "",
       pixAtivo: formData.pixAtivo,
-      tipoChavePix: formData.pixAtivo ? formData.tipoChavePix : "",
-      chavePix: formData.pixAtivo ? formData.chavePix.trim() : "",
-      titularPix: formData.pixAtivo ? formData.titularPix.trim() : "",
+      tipoChavePix: formData.pixAtivo ? formData.tipoChavePix : null,
+      chavePix: formData.pixAtivo ? formData.chavePix.trim() : null,
+      titularPix: formData.pixAtivo ? formData.titularPix.trim() : null,
       instagram: formData.instagram.trim(),
       facebook: formData.facebook.trim(),
       tiktok: formData.tiktok.trim(),
       twitter: formData.twitter.trim(),
       site: formData.site.trim(),
-      whatsapp: somenteNumeros(formData.whatsapp),
-      fotoPerfilArquivo: profilePhotoFile,
-      fotoCapaArquivo: coverPhotoFile,
     };
-    console.log("Dados preparados para atualização do perfil da ONG:", payload);
-    setMensagemSalvar(
-      "Os dados foram preparados. Para gravá-los no banco, ainda é necessário conectar o endpoint de atualização do perfil no backend.",
-    );
+
+    try {
+      setSalvando(true);
+      setMensagemSalvar("");
+
+      // 1. Atualiza os dados textuais do perfil
+      const response = await apiService.put("/usuario/perfil", payload);
+
+      let dadosAtualizados = response.data as PerfilOngApi;
+
+      // 2. Se uma nova foto de perfil foi selecionada, envia o arquivo
+      if (profilePhotoFile) {
+        const formDataFoto = new FormData();
+        formDataFoto.append("arquivo", profilePhotoFile);
+
+        try {
+          const respostaFoto = await apiService.post(
+            "/usuario/perfil/foto",
+            formDataFoto,
+          );
+
+          dadosAtualizados = respostaFoto.data as PerfilOngApi;
+
+          // Atualiza a imagem exibida com o caminho salvo no backend
+          setProfilePhoto(resolverUrlFoto(dadosAtualizados.fotoPerfil));
+
+          // Limpa o arquivo selecionado após o envio bem-sucedido
+          setProfilePhotoFile(null);
+
+          if (profileInputRef.current) {
+            profileInputRef.current.value = "";
+          }
+        } catch (error) {
+          console.error("Erro ao enviar foto de perfil:", error);
+
+          const erro = error as {
+            response?: { data?: { message?: string } };
+          };
+
+          setPerfilOriginal(dadosAtualizados);
+          setHasChanges(true);
+          setMensagemSalvar(
+            erro.response?.data?.message ||
+              "Os dados do perfil foram salvos, mas não foi possível enviar a foto. Tente novamente.",
+          );
+
+          return;
+        }
+      }
+
+      setPerfilOriginal(dadosAtualizados);
+
+      // A foto de capa ainda não está integrada
+      setHasChanges(Boolean(coverPhotoFile));
+
+      if (coverPhotoFile) {
+        setMensagemSalvar(
+          "Dados do perfil e foto de perfil salvos. A foto de capa ainda não foi enviada.",
+        );
+      } else {
+        setMensagemSalvar("Perfil atualizado com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar perfil:", error);
+
+      const erro = error as {
+        response?: { data?: { message?: string } };
+      };
+
+      setMensagemSalvar(
+        erro.response?.data?.message ||
+          "Não foi possível atualizar o perfil. Tente novamente.",
+      );
+    } finally {
+      setSalvando(false);
+    }
+  };
+
+  const resolverUrlFoto = (foto: string | null | undefined): string | null => {
+    if (!foto) return null;
+
+    // Mantém URLs completas e previews locais
+    if (/^(https?:|blob:|data:)/i.test(foto)) {
+      return foto;
+    }
+
+    const baseURL = apiService.defaults.baseURL || window.location.origin;
+
+    return new URL(foto, new URL(baseURL, window.location.origin)).toString();
   };
 
   return (
@@ -429,7 +531,7 @@ export default function EditarPerfilOng() {
           </div>
         )}
 
-        <form className="space-y-8 pb-8" onSubmit={prepararDados}>
+        <form className="space-y-8 pb-8" onSubmit={salvarPerfil}>
           {/* Imagens sem conteúdo fictício: a ONG envia as próprias fotos. */}
           <section className="overflow-hidden rounded-[24px] bg-white shadow-[0_12px_32px_rgba(44,47,48,0.05)]">
             <div className="group relative h-48 overflow-hidden bg-[#e8eef1] sm:h-64">
@@ -468,7 +570,7 @@ export default function EditarPerfilOng() {
                 <input
                   ref={coverInputRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp"
                   className="hidden"
                   onChange={(e) => handleImageChange(e, "capa")}
                 />
@@ -581,7 +683,7 @@ export default function EditarPerfilOng() {
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <div>
                     <label className={labelClass} htmlFor="nomeOng">
-                      Nome da ONG *
+                      Nome da ONG
                     </label>
                     <input
                       id="nomeOng"
@@ -595,7 +697,7 @@ export default function EditarPerfilOng() {
                   </div>
                   <div>
                     <label className={labelClass} htmlFor="cnpj">
-                      CNPJ *
+                      CNPJ
                     </label>
                     <input
                       id="cnpj"
@@ -620,7 +722,7 @@ export default function EditarPerfilOng() {
                   </div>
                   <div>
                     <label className={labelClass} htmlFor="estado">
-                      Estado *
+                      Estado
                     </label>
                     <div className="relative">
                       <select
@@ -658,7 +760,7 @@ export default function EditarPerfilOng() {
                   </div>
                   <div>
                     <label className={labelClass} htmlFor="cidade">
-                      Cidade *
+                      Cidade
                     </label>
                     <div className="relative">
                       <select
@@ -704,7 +806,7 @@ export default function EditarPerfilOng() {
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   <div>
                     <label className={labelClass} htmlFor="telefone">
-                      Telefone / WhatsApp *
+                      Telefone / WhatsApp
                     </label>
                     <div className="relative">
                       <input
@@ -713,7 +815,15 @@ export default function EditarPerfilOng() {
                         type="tel"
                         autoComplete="tel"
                         value={formData.telefone}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          setFormData((atual) => ({
+                            ...atual,
+                            telefone: formatarTelefone(e.target.value),
+                          }));
+
+                          setHasChanges(true);
+                          setMensagemSalvar("");
+                        }}
                         className={`${inputClass} pr-11`}
                         placeholder="(xx) xxxxx-xxxx"
                         required
@@ -726,7 +836,7 @@ export default function EditarPerfilOng() {
                   </div>
                   <div>
                     <label className={labelClass} htmlFor="emailInstitucional">
-                      E-mail institucional *
+                      E-mail institucional
                     </label>
                     <div className="relative">
                       <input
@@ -747,7 +857,7 @@ export default function EditarPerfilOng() {
                   </div>
                   <div className="md:col-span-2">
                     <label className={labelClass} htmlFor="enderecoPublico">
-                      Endereço do abrigo / sede *
+                      Endereço do abrigo
                     </label>
                     <div className="relative">
                       <input
@@ -809,7 +919,7 @@ export default function EditarPerfilOng() {
                   <>
                     <div>
                       <label className={labelClass} htmlFor="tipoChavePix">
-                        Tipo de chave Pix *
+                        Tipo de chave Pix
                       </label>
                       <div className="relative">
                         <select
@@ -834,7 +944,7 @@ export default function EditarPerfilOng() {
                     </div>
                     <div>
                       <label className={labelClass} htmlFor="chavePix">
-                        Chave Pix *
+                        Chave Pix
                       </label>
                       <div className="relative">
                         <input
@@ -854,7 +964,7 @@ export default function EditarPerfilOng() {
                     </div>
                     <div>
                       <label className={labelClass} htmlFor="titularPix">
-                        Titular da conta *
+                        Titular da conta
                       </label>
                       <input
                         id="titularPix"
@@ -966,26 +1076,6 @@ export default function EditarPerfilOng() {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className={labelClass} htmlFor="whatsapp">
-                    WhatsApp comercial
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="whatsapp"
-                      name="whatsapp"
-                      type="tel"
-                      value={formData.whatsapp}
-                      onChange={handleChange}
-                      className={`${inputClass} pr-11`}
-                      placeholder="DDD + número"
-                    />
-                    <MessageCircle
-                      size={17}
-                      className="absolute right-4 top-3.5 text-[#757778]"
-                    />
-                  </div>
-                </div>
               </section>
             </aside>
           </div>
@@ -1018,10 +1108,11 @@ export default function EditarPerfilOng() {
               </button>
               <button
                 type="submit"
-                disabled={carregandoPerfil}
+                disabled={carregandoPerfil || salvando}
                 className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[20px] bg-gradient-to-r from-[#006286] to-[#1eb7f5] px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
               >
-                <CheckCircle2 size={18} /> Preparar alterações
+                <CheckCircle2 size={18} />
+                {salvando ? "Salvando..." : "Salvar alterações"}
               </button>
             </div>
           </section>
