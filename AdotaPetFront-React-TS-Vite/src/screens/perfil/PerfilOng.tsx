@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -55,6 +54,11 @@ interface PerfilOngDados {
   uf?: string | null;
   localizacao?: string | null;
   cnpj?: string | null;
+
+  pixAtivo?: boolean;
+  tipoChavePix?: string | null;
+  chavePix?: string | null;
+  titularPix?: string | null;
 }
 
 const ESTADOS_POR_SIGLA: Record<string, string> = {
@@ -100,9 +104,7 @@ function resolverUrlImagem(caminho?: string | null): string {
     return caminho;
   }
 
-  const caminhoNormalizado = caminho.startsWith("/")
-    ? caminho
-    : `/${caminho}`;
+  const caminhoNormalizado = caminho.startsWith("/") ? caminho : `/${caminho}`;
 
   try {
     return new URL(caminhoNormalizado, baseURL).toString();
@@ -241,8 +243,7 @@ export default function PerfilOng() {
   // Se existe ongId na URL, estamos visualizando o perfil público.
   const perfilPublico = Boolean(ongId);
 
-  const [abaAtiva, setAbaAtiva] =
-    useState<AbaAnimais>("DISPONIVEL");
+  const [abaAtiva, setAbaAtiva] = useState<AbaAnimais>("DISPONIVEL");
 
   const [animais, setAnimais] = useState<AnimalPerfil[]>([]);
   const [perfil, setPerfil] = useState<PerfilOngDados | null>(null);
@@ -255,9 +256,7 @@ export default function PerfilOng() {
   const [erroFotoPerfil, setErroFotoPerfil] = useState(false);
 
   const nomeOng =
-    perfil?.nomeOng?.trim() ||
-    perfil?.nome?.trim() ||
-    "Perfil da ONG";
+    perfil?.nomeOng?.trim() || perfil?.nome?.trim() || "Perfil da ONG";
 
   const descricaoOng =
     perfil?.descricaoOng?.trim() ||
@@ -301,9 +300,7 @@ export default function PerfilOng() {
         console.error("Erro ao carregar animais da ONG:", error);
 
         if (!cancelado) {
-          setErroAnimais(
-            "Não foi possível carregar os animais desta ONG.",
-          );
+          setErroAnimais("Não foi possível carregar os animais desta ONG.");
         }
       } finally {
         if (!cancelado) {
@@ -329,9 +326,7 @@ export default function PerfilOng() {
         console.error("Erro ao carregar perfil da ONG:", error);
 
         if (!cancelado) {
-          setErroPerfil(
-            "Não foi possível carregar os dados do perfil da ONG.",
-          );
+          setErroPerfil("Não foi possível carregar os dados do perfil da ONG.");
         }
       } finally {
         if (!cancelado) {
@@ -399,10 +394,7 @@ export default function PerfilOng() {
         await navigator.clipboard.writeText(window.location.href);
         window.alert("Link do perfil copiado para compartilhar!");
       } else {
-        window.prompt(
-          "Copie o link para compartilhar:",
-          window.location.href,
-        );
+        window.prompt("Copie o link para compartilhar:", window.location.href);
       }
     } catch (error) {
       if (error instanceof Error && error.name !== "AbortError") {
@@ -452,9 +444,7 @@ export default function PerfilOng() {
               <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                 <div>
                   <h1 className="text-2xl font-extrabold tracking-tight text-[#222] sm:text-3xl">
-                    {carregandoPerfil
-                      ? "Carregando perfil..."
-                      : nomeOng}
+                    {carregandoPerfil ? "Carregando perfil..." : nomeOng}
                   </h1>
 
                   <p className="mt-2 flex items-center justify-center gap-1.5 text-sm font-medium text-gray-500 md:justify-start">
@@ -512,7 +502,6 @@ export default function PerfilOng() {
               >
                 <PawPrint className="h-5 w-5" />
                 Animais disponíveis
-
                 <span className="rounded-full bg-[#EAF8FF] px-2 py-0.5 text-xs font-bold text-[#168fc5]">
                   {totalDisponiveis}
                 </span>
@@ -529,7 +518,6 @@ export default function PerfilOng() {
               >
                 <HeartHandshake className="h-5 w-5" />
                 Animais adotados
-
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-500">
                   {totalAdotados}
                 </span>
@@ -607,7 +595,8 @@ export default function PerfilOng() {
               </h3>
 
               <p className="mt-2 max-w-md text-sm text-gray-500">
-                Quando houver animais cadastrados com este status, eles aparecerão aqui.
+                Quando houver animais cadastrados com este status, eles
+                aparecerão aqui.
               </p>
             </div>
           )}
@@ -703,6 +692,63 @@ export default function PerfilOng() {
           </div>
         </section>
 
+        {/* Card de doações */}
+        {perfil?.pixAtivo === true && (
+          <section className="rounded-[20px] border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF8FF] text-[#168fc5]">
+                <HeartHandshake className="h-6 w-6" />
+              </div>
+
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  Ajude nossa ONG!
+                </h2>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  Sua contribuição ajuda a cuidar dos nossos animais.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-[20px] bg-[#F8FAFC] p-5">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Tipo de chave Pix
+                </span>
+
+                <p className="mt-1 font-semibold text-gray-800">
+                  {formatarEnum(perfil.tipoChavePix)}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Chave Pix
+                </span>
+
+                <p className="mt-1 break-all font-semibold text-[#168fc5]">
+                  {perfil.chavePix}
+                </p>
+              </div>
+
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                  Titular da chave
+                </span>
+
+                <p className="mt-1 font-semibold text-gray-800">
+                  {perfil.titularPix}
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-center text-xs text-gray-500">
+              Agradecemos por apoiar nosso trabalho!
+            </p>
+          </section>
+        )}
+
         {/* Banner de apoio */}
         <section className="flex flex-col items-center justify-between gap-6 overflow-hidden rounded-[20px] bg-gradient-to-r from-[#168fc5] to-[#36c3ff] p-8 text-white shadow-sm sm:p-10 md:flex-row">
           <div className="max-w-xl text-center md:text-left">
@@ -715,7 +761,8 @@ export default function PerfilOng() {
             </h2>
 
             <p className="mt-2 text-sm leading-relaxed text-white/90">
-              Entre em contato para saber como ajudar a ONG nos cuidados e na adoção responsável dos animais.
+              Entre em contato para saber como ajudar a ONG nos cuidados e na
+              adoção responsável dos animais.
             </p>
           </div>
 
@@ -736,13 +783,12 @@ export default function PerfilOng() {
       <footer className="mt-8 border-t border-gray-200 bg-white">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-5 px-6 py-8 text-center sm:flex-row sm:text-left">
           <div>
-            <span className="text-lg font-bold text-[#168fc5]">
-              Adota Pet
-            </span>
+            <span className="text-lg font-bold text-[#168fc5]">Adota Pet</span>
 
             <p className="mt-1 text-xs text-gray-500">
               © 2026 Adota Pet
-              {nomeOng !== "Perfil da ONG" ? ` • ${nomeOng}` : ""}. Todos os direitos reservados.
+              {nomeOng !== "Perfil da ONG" ? ` • ${nomeOng}` : ""}. Todos os
+              direitos reservados.
             </p>
           </div>
 

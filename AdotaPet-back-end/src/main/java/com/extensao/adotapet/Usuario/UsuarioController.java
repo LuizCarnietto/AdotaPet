@@ -309,6 +309,7 @@ public class UsuarioController {
         Usuario usuario = obterAdotanteAutenticado(authentication);
 
         String nome = data.nome() == null ? "" : data.nome().trim();
+
         String email = data.email() == null
                 ? ""
                 : data.email().trim().toLowerCase();
@@ -317,8 +318,14 @@ public class UsuarioController {
                 ? ""
                 : data.telefone().trim();
 
-        String cpf = data.cpf() == null
+        // CPF que já está salvo no banco
+        String cpfAtual = usuario.getCpf() == null
                 ? ""
+                : usuario.getCpf().replaceAll("\\D", "");
+
+        // Se o CPF não foi enviado ou veio vazio, mantém o atual
+        String cpf = data.cpf() == null || data.cpf().isBlank()
+                ? cpfAtual
                 : data.cpf().replaceAll("\\D", "");
 
         if (nome.isBlank()) {
@@ -335,11 +342,27 @@ public class UsuarioController {
             );
         }
 
-        if (!cpfValido(cpf)) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "CPF inválido"
-            );
+        // Só valida o CPF se ele realmente foi alterado
+        boolean cpfAlterado = !cpf.equals(cpfAtual);
+
+        if (cpfAlterado) {
+            if (!cpfValido(cpf)) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "CPF inválido"
+                );
+            }
+
+            boolean cpfEmUso = repository.findByCpf(cpf)
+                    .filter(outro -> outro.getId() != usuario.getId())
+                    .isPresent();
+
+            if (cpfEmUso) {
+                throw new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "Este CPF já está cadastrado"
+                );
+            }
         }
 
         if (data.dataNascimento() != null &&
@@ -362,22 +385,15 @@ public class UsuarioController {
             );
         }
 
-        // Verifica se o CPF pertence a outro usuário
-        boolean cpfEmUso = repository.findByCpf(cpf)
-                .filter(outro -> outro.getId() != usuario.getId())
-                .isPresent();
-
-        if (cpfEmUso) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Este CPF já está cadastrado"
-            );
-        }
-
         usuario.setNome(nome);
         usuario.setEmail(email);
         usuario.setTelefone(telefone);
-        usuario.setCpf(cpf);
+
+        // Só altera o CPF se o usuário realmente modificou
+        if (cpfAlterado) {
+            usuario.setCpf(cpf);
+        }
+
         usuario.setDataNascimento(data.dataNascimento());
 
         Usuario atualizado = repository.save(usuario);

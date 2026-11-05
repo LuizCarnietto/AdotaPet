@@ -255,7 +255,7 @@ const ListarAnimais = () => {
           </div>
 
           <div className="space-y-4">
-            {/* ESPÉCIE */}
+
             <FilterCard label="Especie do animal">
               <Select
                 value={filtro.especie}
@@ -282,7 +282,6 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            {/* RAÇA */}
             <div className="relative z-50">
               <FilterCard label="Raça">
                 <div className="racaAutocomplete relative w-full">
@@ -329,7 +328,6 @@ const ListarAnimais = () => {
               </FilterCard>
             </div>
 
-            {/* SEXO */}
             <FilterCard label="Sexo">
               <Select
                 value={filtro.sexo}
@@ -351,7 +349,6 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            {/* COR */}
             <FilterCard label="Cor">
               <Select
                 value={filtro.cor}
@@ -378,7 +375,6 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            {/* IDADE */}
             <FilterCard label="Idade">
               <Select
                 value={filtro.idade}
@@ -400,8 +396,7 @@ const ListarAnimais = () => {
                 </SelectContent>
               </Select>
             </FilterCard>
-
-            {/* PORTE */}
+   
             <FilterCard label="Porte do animal">
               <Select
                 value={filtro.porte}
@@ -424,7 +419,6 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            {/* MICROCHIP */}
             <FilterCard label="Possui Microchip?">
               <Select
                 value={filtro.possuiChip}
@@ -446,7 +440,6 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            {/* LOCALIZAÇÃO */}
             <FilterCard label="Localização">
               <div className="flex gap-2 w-full">
                 <Select
@@ -491,7 +484,6 @@ const ListarAnimais = () => {
               </div>
             </FilterCard>
 
-            {/* VACINADO */}
             <FilterCard label="Vacinado">
               <Select
                 value={filtro.vacinado}
@@ -514,7 +506,6 @@ const ListarAnimais = () => {
               </Select>
             </FilterCard>
 
-            {/* BOTÕES */}
             <div className="flex w-full gap-2">
               <Button
                 className="h-[48px] flex-1 rounded-[30px] bg-[#36C3FF] px-3 text-[14px] text-white hover:bg-[#2db0e8]"
@@ -533,7 +524,7 @@ const ListarAnimais = () => {
           </div>
         </aside>
 
-        <section className="flex-1 bg-violet-200/30 rounded-3xl p-6 min-h-[600px]">
+        <section className="flex-1 bg-white rounded-3xl p-6 min-h-[600px]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {animaisDaPagina.map((pet) => (
               <div
