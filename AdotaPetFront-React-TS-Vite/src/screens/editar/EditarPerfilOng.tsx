@@ -658,7 +658,7 @@ export default function EditarPerfilOng() {
                       Descrição da ONG
                     </label>
                     <span className="shrink-0 text-xs text-[#757778]">
-                      {formData.descricaoOng.length} / 1000
+                      {formData.descricaoOng.length} / 500
                     </span>
                   </div>
                   <textarea
@@ -666,7 +666,7 @@ export default function EditarPerfilOng() {
                     name="descricaoOng"
                     value={formData.descricaoOng}
                     onChange={handleChange}
-                    maxLength={1000}
+                    maxLength={500}
                     rows={6}
                     className={`${inputClass} resize-y leading-relaxed`}
                     placeholder="Descreva a missão, a história e as atividades da sua ONG..."

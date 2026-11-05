@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "../../services/ApiService";
+import { Header } from "@/components/Header";
 
 export default function RegistroAnimal() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function RegistroAnimal() {
   const [racasSugestoes, setRacasSugestoes] = useState<any[]>([]);
   const [buscandoRacas, setBuscandoRacas] = useState(false);
   const [especieSelecionada, setEspecieSelecionada] = useState("");
+  const [descricaoAnimal, setDescricaoAnimal] = useState("");
 
   // Verifica se o usuário é uma ONG
   useEffect(() => {
@@ -112,10 +114,6 @@ export default function RegistroAnimal() {
         "#descricaoAnimal > input",
       ) as HTMLInputElement | null;
 
-      const descricaoInput = document.querySelector(
-        "#descricaoAnimal textarea",
-      ) as HTMLTextAreaElement | null;
-
       const idadeInput = document.getElementById(
         "idade",
       ) as HTMLSelectElement | null;
@@ -143,7 +141,7 @@ export default function RegistroAnimal() {
       // Valores
 
       const nome = nomeInput?.value.trim() || "";
-      const comportamento = descricaoInput?.value.trim() || "";
+      const comportamento = descricaoAnimal.trim();
       const idade = idadeInput?.value || "";
       const especie = especieSelecionada;
       const microchip = microchipInput?.value || "";
@@ -331,41 +329,6 @@ export default function RegistroAnimal() {
             align-items: center;
             flex-direction: column;
             background-color: #fff;
-          }
-
-          header {
-            background-color: white;
-            width: 100%;
-            height: 90px;
-            padding: 10px 0;
-            align-items: center;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            box-sizing: border-box;
-          }
-
-          nav {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 70px;
-          }
-
-          nav > a:hover {
-            text-decoration: underline;
-          }
-
-          nav > a > img {
-            height: 65px;
-            width: 75px;
-            object-fit: contain;
-          }
-
-          a {
-            text-decoration: none;
-            color: black;
-            font-family: "Courier New", Courier, monospace;
           }
 
           div#container {
@@ -557,6 +520,15 @@ export default function RegistroAnimal() {
             font-family: "Inter", sans-serif;
           }
 
+          .contadorDescricaoAnimal {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 6px;
+            font-family: "Inter", sans-serif;
+            font-size: 12px;
+            color: #757778;
+          }
+
           input::placeholder,
           textarea::placeholder {
             font-size: 13px;
@@ -727,24 +699,9 @@ export default function RegistroAnimal() {
             transition: background-color 0.2s ease;
           }
 
-          /* ================================
-             TELAS HD / ALTURA MENOR
-             ================================ */
+          /* Telas hd */
 
           @media (max-height: 850px) {
-            header {
-              height: 70px;
-              padding: 5px 0;
-            }
-
-            nav {
-              gap: 55px;
-            }
-
-            nav > a > img {
-              height: 52px;
-              width: 65px;
-            }
 
             div#container {
               margin-top: 8px;
@@ -834,9 +791,7 @@ export default function RegistroAnimal() {
             }
           }
 
-          /* ================================
-             TELAS MÉDIAS
-             ================================ */
+          /* Telas médias */
 
           @media (max-width: 1200px) {
             div#container {
@@ -856,29 +811,13 @@ export default function RegistroAnimal() {
             div#descricaoAnimal {
               width: 560px;
             }
-
-            nav {
-              gap: 40px;
-            }
           }
 
-          /* ================================
-             CELULAR / TELAS PEQUENAS
-             ================================ */
+          /* Telas pequenas, celularse */
 
           @media (max-width: 900px) {
             body {
               overflow-y: auto;
-            }
-
-            header {
-              height: auto;
-              padding: 15px;
-            }
-
-            nav {
-              gap: 20px;
-              flex-wrap: wrap;
             }
 
             div#container {
@@ -903,24 +842,7 @@ export default function RegistroAnimal() {
         `}
       </style>
 
-      <header>
-        <nav>
-          <a href="/login">Entrar</a>
-
-          <a href="/listaadotar">Adotar</a>
-
-          <a href="/">
-            <img
-              src="/imagens/logoMelhor.png"
-              alt="Logo com desenho e escrito"
-            />
-          </a>
-
-          <a href="/#sobre">Sobre</a>
-
-          <a href="/#faq">F.A.Q</a>
-        </nav>
-      </header>
+      <Header />
 
       <div id="container">
         <div id="containerFotosAnimal">
@@ -1482,13 +1404,37 @@ export default function RegistroAnimal() {
               defaultValue=""
             />
 
-            <textarea placeholder="Descreva o animal aqui"></textarea>
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                  gap: "12px",
+                  marginBottom: "8px",
+                  width: "100%",
+                }}
+              >
+
+                <span className="shrink-0 text-xs text-[#757778]">
+                  {descricaoAnimal.length} / 500
+                </span>
+              </div>
+
+              <textarea
+                id="comportamentoAnimal"
+                value={descricaoAnimal}
+                onChange={(e) => setDescricaoAnimal(e.target.value)}
+                maxLength={500}
+                placeholder="Descreva o animal aqui..."
+              />
+            </div>
           </div>
 
           {/* Cards */}
 
           <div className="containerCard">
-            {/* COLUNA ESQUERDA */}
+            {/* Coluna esquerda */}
 
             <div className="cardBoxEsquerdo">
               <div className="infoCard1">

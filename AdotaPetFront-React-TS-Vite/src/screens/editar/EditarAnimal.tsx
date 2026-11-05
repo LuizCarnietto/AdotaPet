@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiService } from "../../services/ApiService";
+import { Header } from "@/components/Header";
 
 export default function EdicaoAnimal() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ export default function EdicaoAnimal() {
   const [racasSugestoes, setRacasSugestoes] = useState<any[]>([]);
   const [buscandoRacas, setBuscandoRacas] = useState(false);
   const [especieSelecionada, setEspecieSelecionada] = useState("");
+  const [descricaoAnimal, setDescricaoAnimal] = useState("");
+
 
   const [, setCarregandoAnimal] = useState(true);
 
@@ -203,10 +206,6 @@ export default function EdicaoAnimal() {
             "#descricaoAnimal > input",
           ) as HTMLInputElement | null;
 
-          const descricaoInput = document.querySelector(
-            "#descricaoAnimal textarea",
-          ) as HTMLTextAreaElement | null;
-
           const idadeInput = document.getElementById(
             "idade",
           ) as HTMLSelectElement | null;
@@ -235,9 +234,7 @@ export default function EdicaoAnimal() {
             nomeInput.value = animal.nome || "";
           }
 
-          if (descricaoInput) {
-            descricaoInput.value = animal.comportamento || "";
-          }
+          setDescricaoAnimal(animal.comportamento || "");
 
           if (idadeInput) {
             idadeInput.value = animal.idade || "";
@@ -348,7 +345,7 @@ export default function EdicaoAnimal() {
       ) as HTMLSelectElement | null;
 
       const nome = nomeInput?.value.trim() || "";
-      const comportamento = descricaoInput?.value.trim() || "";
+      const comportamento = descricaoAnimal.trim();
       const idade = idadeInput?.value || "";
       const especie = especieSelecionada;
       const microchip = microchipInput?.value || "";
@@ -495,50 +492,17 @@ export default function EdicaoAnimal() {
             background-color: #fff;
           }
 
-          header {
-            background-color: white;
-            width: 100%;
-            height: 90px;
-            padding: 10px 0;
-            align-items: center;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            box-sizing: border-box;
-          }
-
-          nav {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 70px;
-          }
-
-          nav > a:hover {
-            text-decoration: underline;
-          }
-
-          nav > a > img {
-            height: 65px;
-            width: 75px;
-            object-fit: contain;
-          }
-
-          a {
-            text-decoration: none;
-            color: black;
-            font-family: "Courier New", Courier, monospace;
-          }
-
           div#container {
             background-color: white;
+
             display: flex;
             justify-content: center;
             align-items: flex-start;
+            
             max-width: 1440px;
             width: 100%;
             padding: 0 30px;
-            margin: 15px auto 0 auto;
+            margin: 30px auto 0 auto;
             box-sizing: border-box;
             gap: 50px;
           }
@@ -889,27 +853,11 @@ export default function EdicaoAnimal() {
             transition: background-color 0.2s ease;
           }
 
-          /* ================================
-             TELAS HD / ALTURA MENOR
-             ================================ */
+          /* telas hd */
 
           @media (max-height: 850px) {
-            header {
-              height: 70px;
-              padding: 5px 0;
-            }
-
-            nav {
-              gap: 55px;
-            }
-
-            nav > a > img {
-              height: 52px;
-              width: 65px;
-            }
-
             div#container {
-              margin-top: 8px;
+              margin-top: 30px;
               gap: 35px;
               padding: 0 25px;
             }
@@ -996,12 +944,11 @@ export default function EdicaoAnimal() {
             }
           }
 
-          /* ================================
-             TELAS MÉDIAS
-             ================================ */
+          /* telas médias */
 
           @media (max-width: 1200px) {
             div#container {
+              margin-top: 30px;
               gap: 25px;
               padding: 0 20px;
             }
@@ -1018,29 +965,13 @@ export default function EdicaoAnimal() {
             div#descricaoAnimal {
               width: 560px;
             }
-
-            nav {
-              gap: 40px;
-            }
           }
 
-          /* ================================
-             CELULAR / TELAS PEQUENAS
-             ================================ */
+          /* telas pequenas ou celulares */
 
           @media (max-width: 900px) {
             body {
               overflow-y: auto;
-            }
-
-            header {
-              height: auto;
-              padding: 15px;
-            }
-
-            nav {
-              gap: 20px;
-              flex-wrap: wrap;
             }
 
             div#container {
@@ -1064,26 +995,7 @@ export default function EdicaoAnimal() {
           }
         `}
       </style>
-
-      <header>
-        <nav>
-          <a href="/login">Entrar</a>
-
-          <a href="/listaadotar">Adotar</a>
-
-          <a href="/">
-            <img
-              src="/imagens/logoMelhor.png"
-              alt="Logo com desenho e escrito"
-            />
-          </a>
-
-          <a href="/#sobre">Sobre</a>
-
-          <a href="/#faq">F.A.Q</a>
-        </nav>
-      </header>
-
+      <Header />
       <div id="container">
         <div id="containerFotosAnimal">
           <div id="fotoAnimal">
@@ -1644,7 +1556,25 @@ export default function EdicaoAnimal() {
               defaultValue=""
             />
 
-            <textarea placeholder="Descreva o animal aqui"></textarea>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: "8px",
+                width: "100%",
+              }}
+            >
+              <span className="shrink-0 text-xs text-[#757778]">
+                {descricaoAnimal.length} / 500
+              </span>
+            </div>
+
+            <textarea
+              value={descricaoAnimal}
+              onChange={(e) => setDescricaoAnimal(e.target.value)}
+              maxLength={500}
+              placeholder="Descreva o animal aqui"
+            />
           </div>
 
           {/* Cards */}
