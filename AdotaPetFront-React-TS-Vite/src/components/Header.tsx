@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { User, PawPrint, ClipboardList, LogOut, Bell } from "lucide-react";
 import { Button } from "./ui/button";
 import { apiService } from "../services/ApiService";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   mostrarRegistrarAnimal?: boolean;
@@ -377,19 +378,20 @@ export const Header = ({
           }
         `}
                 >
-                  <a
-                    href={
+                  <Link
+                    to={
                       tipoUsuario === "ROLE_ONG"
                         ? "/perfil/PerfilOng"
-                        : "/perfil"
+                        : "/perfil/PerfilAdotante"
                     }
                     onClick={() => setMenuAberto(false)}
                     className="flex items-center gap-3 px-4 py-3 rounded-xl
-                      text-gray-700  hover:bg-[#EAF8FF]  hover:text-[#36c3ff]
-                      transition-colors">
+                      text-gray-700 hover:bg-[#EAF8FF] hover:text-[#36c3ff]
+                      transition-colors"
+                  >
                     <User className="w-4 h-4" />
                     Meu perfil
-                  </a>
+                  </Link>
 
                   {tipoUsuario === "ROLE_ADOTANTE" && (
                     <a

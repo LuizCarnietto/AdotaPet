@@ -15,83 +15,41 @@ import Candidaturas from "@/screens/formularios/Candidaturas.tsx";
 import MinhasCandidaturas from "@/screens/formularios/MinhasCandidaturas.tsx";
 import PerfilOng from "@/screens/perfil/PerfilOng.tsx";
 import EditarPerfilOng from "@/screens/editar/EditarPerfilOng.tsx";
+import PerfilAdotante from "@/screens/perfil/PerfilAdotante.tsx";
+import { ProtectedRoute } from "@/components/ProtectedRoute.tsx";
+
 
 export const routesList = createBrowserRouter([
+  // ---------- PÚBLICAS ----------
+  { path: ROOT_PATH, element: <HomePage /> },
+  { path: "/login", element: <Login /> },
+  { path: "/login/EsqueceuSenha", element: <EsqueceuSenha /> },
+  { path: "/cadastros/CadastroUsuario", element: <CadastroUsuario /> },
+  { path: "/cadastros/CadastroOng", element: <CadastroOng /> },
+  { path: "/listaadotar", element: <ListaAdotar /> },
+  { path: "/listaadotar/DetalhesAnimal/:id", element: <DetalhesAnimal /> },
+  { path: "/ong/:ongId", element: <PerfilOng /> }, // ✅ pública
+
+  // ---------- SÓ ONG ----------
   {
-    path: ROOT_PATH,
-    element: <HomePage />,
+    element: <ProtectedRoute tiposPermitidos={["ROLE_ONG"]} />,
+    children: [
+      { path: "/perfil/PerfilOng", element: <PerfilOng /> },
+      { path: "/perfil/EditarPerfilOng", element: <EditarPerfilOng /> },
+      { path: "/cadastros/RegistroAnimal", element: <RegistroAnimal /> },
+      { path: "/cadastros/AnimaisCadastrados", element: <AnimaisCadastrados /> },
+      { path: "/editar/animal/:id", element: <EditarAnimal /> },
+      { path: "/candidaturas", element: <Candidaturas /> },
+    ],
   },
 
+  // ---------- SÓ ADOTANTE ----------
   {
-    path: "/editar/animal/:id",
-    element: <EditarAnimal />,
-  },
-
-  {
-    path: "/formularios",
-    element: <FormularioAdocao />,
-  },
-
-  {
-    path: "/candidaturas",
-    element: <Candidaturas />,
-  },
-
-  {
-    path:  "/minhas-candidaturas",
-    element: <MinhasCandidaturas/>,
-  },
-
-  {
-    path: "/cadastros/CadastroUsuario",
-    element: <CadastroUsuario/>,
-  },
-
-    {
-      path: "/cadastros/CadastroOng",
-      element: <CadastroOng/>,
-    },
-
-    {
-      path: "/cadastros/RegistroAnimal",
-      element: <RegistroAnimal/>,
-    },
-
-    {
-      path: "/cadastros/AnimaisCadastrados",
-      element: <AnimaisCadastrados/>,
-    },
-
-  {
-    path: "/login",
-    element: <Login />,
-  },
-
-  {
-    path: "/login/EsqueceuSenha",
-    element: <EsqueceuSenha />,
-  },
-
-  {
-    path: "/listaadotar",
-    element: <ListaAdotar />,
-  },
-
-  {
-    path: "/listaadotar/DetalhesAnimal/:id",
-    element: <DetalhesAnimal />,
-  },
-
-  {
-    path: "/ong/:ongId",
-    element: <PerfilOng />,
-  },
-  {
-    path: "/perfil/PerfilOng",
-    element: <PerfilOng />,
-  },
-  {
-    path: "/perfil/EditarPerfilOng",
-    element: <EditarPerfilOng />,
+    element: <ProtectedRoute tiposPermitidos={["ROLE_ADOTANTE"]} />,
+    children: [
+      { path: "/perfil/PerfilAdotante", element: <PerfilAdotante /> },
+      { path: "/minhas-candidaturas", element: <MinhasCandidaturas /> },
+      { path: "/formularios", element: <FormularioAdocao /> },
+    ],
   },
 ]);

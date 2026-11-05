@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import com.extensao.adotapet.Enum.TipoUsuario;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,6 +26,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/usuario")
@@ -30,6 +35,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioRepository repository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping
     public Usuario cadastrar(@RequestBody UsuarioRequestDTO data) {
@@ -279,5 +287,231 @@ public class UsuarioController {
                 ));
 
         return montarResposta(ong);
+    }
+
+    // Busca os dados do adotante autenticado
+    @GetMapping("/perfil/adotante")
+    public PerfilAdotanteResponseDTO buscarPerfilAdotante(
+            Authentication authentication
+    ) {
+        Usuario usuario = obterAdotanteAutenticado(authentication);
+
+        return montarPerfilAdotante(usuario);
+    }
+
+
+    // Atualiza os dados pessoais do adotante
+    @PutMapping("/perfil/adotante")
+    public PerfilAdotanteResponseDTO atualizarPerfilAdotante(
+            @RequestBody AtualizarPerfilAdotanteRequestDTO data,
+            Authentication authentication
+    ) {
+        Usuario usuario = obterAdotanteAutenticado(authentication);
+
+        String nome = data.nome() == null ? "" : data.nome().trim();
+        String email = data.email() == null
+                ? ""
+                : data.email().trim().toLowerCase();
+
+        String telefone = data.telefone() == null
+                ? ""
+                : data.telefone().trim();
+
+        String cpf = data.cpf() == null
+                ? ""
+                : data.cpf().replaceAll("\\D", "");
+
+        if (nome.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "O nome é obrigatório"
+            );
+        }
+
+        if (!email.matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "E-mail inválido"
+            );
+        }
+
+        if (!cpfValido(cpf)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "CPF inválido"
+            );
+        }
+
+        if (data.dataNascimento() != null &&
+                data.dataNascimento().isAfter(LocalDate.now())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A data de nascimento não pode ser futura"
+            );
+        }
+
+        // Verifica se o e-mail pertence a outro usuário
+        boolean emailEmUso = repository.findByEmail(email)
+                .filter(outro -> outro.getId() != usuario.getId())
+                .isPresent();
+
+        if (emailEmUso) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Este e-mail já está cadastrado"
+            );
+        }
+
+        // Verifica se o CPF pertence a outro usuário
+        boolean cpfEmUso = repository.findByCpf(cpf)
+                .filter(outro -> outro.getId() != usuario.getId())
+                .isPresent();
+
+        if (cpfEmUso) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Este CPF já está cadastrado"
+            );
+        }
+
+        usuario.setNome(nome);
+        usuario.setEmail(email);
+        usuario.setTelefone(telefone);
+        usuario.setCpf(cpf);
+        usuario.setDataNascimento(data.dataNascimento());
+
+        Usuario atualizado = repository.save(usuario);
+
+        return montarPerfilAdotante(atualizado);
+    }
+
+
+    // Altera a senha do adotante
+    @PutMapping("/perfil/adotante/senha")
+    public Map<String, String> alterarSenhaAdotante(
+            @RequestBody AlterarSenhaAdotanteRequestDTO data,
+            Authentication authentication
+    ) {
+        Usuario usuario = obterAdotanteAutenticado(authentication);
+
+        if (data.senhaAtual() == null ||
+                data.senhaAtual().isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Informe sua senha atual"
+            );
+        }
+
+        if (!passwordEncoder.matches(
+                data.senhaAtual(),
+                usuario.getSenha()
+        )) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A senha atual está incorreta"
+            );
+        }
+
+        if (data.novaSenha() == null ||
+                data.novaSenha().length() < 8) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A nova senha deve ter pelo menos 8 caracteres"
+            );
+        }
+
+        if (passwordEncoder.matches(
+                data.novaSenha(),
+                usuario.getSenha()
+        )) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "A nova senha deve ser diferente da atual"
+            );
+        }
+
+        usuario.setSenha(passwordEncoder.encode(data.novaSenha()));
+
+        repository.save(usuario);
+
+        return Map.of("mensagem", "Senha alterada com sucesso");
+    }
+
+
+    // Confere se o usuário autenticado é um adotante
+    private Usuario obterAdotanteAutenticado(
+            Authentication authentication
+    ) {
+        if (authentication == null ||
+                !(authentication.getPrincipal() instanceof Usuario usuario)) {
+            throw new ResponseStatusException(
+                    HttpStatus.UNAUTHORIZED,
+                    "Usuário não autenticado"
+            );
+        }
+
+        if (usuario.getTipoUsuario() != TipoUsuario.ROLE_ADOTANTE) {
+            throw new ResponseStatusException(
+                    HttpStatus.FORBIDDEN,
+                    "Esta funcionalidade é exclusiva para adotantes"
+            );
+        }
+
+        return usuario;
+    }
+
+
+    // Monta a resposta segura do perfil
+    private PerfilAdotanteResponseDTO montarPerfilAdotante(
+            Usuario usuario
+    ) {
+        return new PerfilAdotanteResponseDTO(
+                usuario.getNome(),
+                usuario.getEmail(),
+                usuario.getTelefone(),
+                usuario.getCpf(),
+                usuario.getDataNascimento(),
+                usuario.getFotoPerfil()
+        );
+    }
+
+
+    // Validação dos dígitos do CPF
+    private boolean cpfValido(String cpf) {
+        if (cpf == null ||
+                !cpf.matches("\\d{11}") ||
+                cpf.chars().distinct().count() == 1) {
+            return false;
+        }
+
+        int soma = 0;
+
+        for (int i = 0; i < 9; i++) {
+            soma += (cpf.charAt(i) - '0') * (10 - i);
+        }
+
+        int primeiroDigito = (soma * 10) % 11;
+
+        if (primeiroDigito == 10) {
+            primeiroDigito = 0;
+        }
+
+        if (primeiroDigito != cpf.charAt(9) - '0') {
+            return false;
+        }
+
+        soma = 0;
+
+        for (int i = 0; i < 10; i++) {
+            soma += (cpf.charAt(i) - '0') * (11 - i);
+        }
+
+        int segundoDigito = (soma * 10) % 11;
+
+        if (segundoDigito == 10) {
+            segundoDigito = 0;
+        }
+
+        return segundoDigito == cpf.charAt(10) - '0';
     }
 }
