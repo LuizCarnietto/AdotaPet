@@ -339,7 +339,7 @@ export default function RegistroAnimal() {
             max-width: 1440px;
             width: 100%;
             padding: 0 30px;
-            margin: 15px auto 0 auto;
+            margin: 30px auto 0 auto;
             box-sizing: border-box;
             gap: 50px;
           }
@@ -704,7 +704,7 @@ export default function RegistroAnimal() {
           @media (max-height: 850px) {
 
             div#container {
-              margin-top: 8px;
+              margin-top: 30px;
               gap: 35px;
               padding: 0 25px;
             }
@@ -795,6 +795,7 @@ export default function RegistroAnimal() {
 
           @media (max-width: 1200px) {
             div#container {
+              margin-top: 30px;
               gap: 25px;
               padding: 0 20px;
             }

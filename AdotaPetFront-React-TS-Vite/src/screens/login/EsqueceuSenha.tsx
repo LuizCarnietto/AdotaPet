@@ -1,47 +1,153 @@
 import { useState, ChangeEvent, FormEvent } from "react";
+import axios from "axios";
 
 type Etapa = "email" | "codigo" | "novaSenha" | "sucesso";
 
 interface FormState {
-  email:          string;
-  codigo:         string;
-  novaSenha:      string;
+  email: string;
+  codigo: string;
+  novaSenha: string;
   confirmarSenha: string;
 }
 
 export default function EsqueceuSenha() {
-  const [etapa, setEtapa]   = useState<Etapa>("email");
-  const [form, setForm]     = useState<FormState>({ email: "", codigo: "", novaSenha: "", confirmarSenha: "" });
-  const [erro, setErro]     = useState<string | null>(null);
+  const [etapa, setEtapa] = useState<Etapa>("email");
+  const [form, setForm] = useState<FormState>({
+    email: "",
+    codigo: "",
+    novaSenha: "",
+    confirmarSenha: "",
+  });
+  const [erro, setErro] = useState<string | null>(null);
+  const [carregando, setCarregando] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEmail = (e: FormEvent): void => {
+  const handleEmail = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setErro(null);
-    if (!form.email.trim()) return setErro("Informe o seu e-mail.");
-    // TODO: chamar API para enviar código
-    setEtapa("codigo");
+
+    if (!form.email.trim()) {
+      return setErro("Informe o seu e-mail.");
+    }
+
+    try {
+      setCarregando(true);
+
+      await apiService.post("/auth/esqueci-senha", {
+        email: form.email,
+      });
+
+      setEtapa("codigo");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErro(
+          error.response?.data?.erro ||
+            "Não foi possível enviar o código. Tente novamente.",
+        );
+      } else {
+        setErro("Ocorreu um erro inesperado.");
+      }
+    } finally {
+      setCarregando(false);
+    }
   };
 
-  const handleCodigo = (e: FormEvent): void => {
+  const handleCodigo = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setErro(null);
-    if (!form.codigo.trim()) return setErro("Informe o código recebido.");
-    // TODO: chamar API para validar código
-    setEtapa("novaSenha");
+
+    if (!form.codigo.trim()) {
+      return setErro("Informe o código recebido.");
+    }
+
+    if (!/^\d{6}$/.test(form.codigo)) {
+      return setErro("O código deve conter 6 dígitos.");
+    }
+
+    try {
+      setCarregando(true);
+
+      await apiService.post("/auth/validar-codigo", {
+        email: form.email,
+        codigo: form.codigo,
+      });
+
+      setEtapa("novaSenha");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErro(error.response?.data?.erro || "Código inválido ou expirado.");
+      } else {
+        setErro("Ocorreu um erro inesperado.");
+      }
+    } finally {
+      setCarregando(false);
+    }
   };
 
-  const handleNovaSenha = (e: FormEvent): void => {
+  const handleNovaSenha = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setErro(null);
-    if (!form.novaSenha)                          return setErro("Informe a nova senha.");
-    if (form.novaSenha !== form.confirmarSenha)   return setErro("As senhas não coincidem.");
-    // TODO: chamar API para redefinir senha
-    setEtapa("sucesso");
+
+    if (!form.novaSenha) {
+      return setErro("Informe a nova senha.");
+    }
+
+    if (form.novaSenha !== form.confirmarSenha) {
+      return setErro("As senhas não coincidem.");
+    }
+
+    try {
+      setCarregando(true);
+
+      await apiService.post("/auth/redefinir-senha", {
+        email: form.email,
+        codigo: form.codigo,
+        novaSenha: form.novaSenha,
+      });
+
+      setEtapa("sucesso");
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErro(
+          error.response?.data?.erro || "Não foi possível redefinir a senha.",
+        );
+      } else {
+        setErro("Ocorreu um erro inesperado.");
+      }
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const handleReenviarCodigo = async (): Promise<void> => {
+    setErro(null);
+
+    try {
+      setCarregando(true);
+
+      await apiService.post("/auth/esqueci-senha", {
+        email: form.email,
+      });
+
+      setForm((prev) => ({
+        ...prev,
+        codigo: "",
+      }));
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        setErro(
+          error.response?.data?.erro || "Não foi possível reenviar o código.",
+        );
+      } else {
+        setErro("Ocorreu um erro inesperado.");
+      }
+    } finally {
+      setCarregando(false);
+    }
   };
 
   return (
@@ -355,27 +461,31 @@ export default function EsqueceuSenha() {
 
       {/* Container */}
       <div className="es-container">
-
         {/* Logo */}
         <div style={{ margin: "0px auto" }}>
           <a href="/">
             <img
               src="/imagens/logoMelhor.png"
               alt="Logo"
-              style={{ width: "104px", height: "90px", display: "block", margin: "0px auto" }}
+              style={{
+                width: "104px",
+                height: "90px",
+                display: "block",
+                margin: "0px auto",
+              }}
             />
           </a>
         </div>
 
         {/* Card */}
         <div className="es-card">
-
           {/* ── Etapa 1: E-mail ── */}
           {etapa === "email" && (
             <>
               <h1>Esqueceu a senha?</h1>
               <p className="es-subtitulo">
-                Informe o e-mail cadastrado e enviaremos um código de verificação.
+                Informe o e-mail cadastrado e enviaremos um código de
+                verificação.
               </p>
 
               {/* Indicador de etapas */}
@@ -400,7 +510,9 @@ export default function EsqueceuSenha() {
                   placeholder="Digite seu e-mail"
                   autoComplete="off"
                 />
-                <button className="es-btn" type="submit">Enviar código</button>
+                <button className="es-btn" type="submit" disabled={carregando}>
+                  {carregando ? "Enviando..." : "Enviar código"}
+                </button>
               </form>
 
               <p className="es-rodape">
@@ -414,7 +526,8 @@ export default function EsqueceuSenha() {
             <>
               <h1>Código enviado</h1>
               <p className="es-subtitulo">
-                Enviamos um código de 6 dígitos para <strong>{form.email}</strong>. Verifique sua caixa de entrada.
+                Enviamos um código de 6 dígitos para{" "}
+                <strong>{form.email}</strong>. Verifique sua caixa de entrada.
               </p>
 
               <div className="es-steps">
@@ -440,12 +553,20 @@ export default function EsqueceuSenha() {
                   maxLength={6}
                   className="es-codigo-input"
                 />
-                <button className="es-btn" type="submit">Verificar código</button>
+                <button className="es-btn" type="submit" disabled={carregando}>
+                  {carregando ? "Verificando..." : "Verificar código"}
+                </button>
               </form>
 
               <p className="es-rodape">
                 Não recebeu?{" "}
-                <a href="#" onClick={(e) => { e.preventDefault(); setErro(null); }}>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleReenviarCodigo();
+                  }}
+                >
                   Reenviar código
                 </a>
               </p>
@@ -481,7 +602,9 @@ export default function EsqueceuSenha() {
                   placeholder="●●●●●●●"
                   autoComplete="off"
                 />
-                <label htmlFor="confirmarSenha" className="es-label-gap">Confirmar nova senha</label>
+                <label htmlFor="confirmarSenha" className="es-label-gap">
+                  Confirmar nova senha
+                </label>
                 <input
                   id="confirmarSenha"
                   name="confirmarSenha"
@@ -491,7 +614,9 @@ export default function EsqueceuSenha() {
                   placeholder="●●●●●●●"
                   autoComplete="off"
                 />
-                <button className="es-btn" type="submit">Redefinir senha</button>
+                <button className="es-btn" type="submit" disabled={carregando}>
+                  {carregando ? "Redefinindo..." : "Redefinir senha"}
+                </button>
               </form>
             </>
           )}
@@ -504,16 +629,16 @@ export default function EsqueceuSenha() {
               </div>
               <h2 className="es-sucesso-titulo">Senha redefinida!</h2>
               <p className="es-sucesso-texto">
-                Sua senha foi alterada com sucesso. Agora você já pode fazer login com a nova senha.
+                Sua senha foi alterada com sucesso. Agora você já pode fazer
+                login com a nova senha.
               </p>
-              <a href="login.html" style={{ width: "100%" }}>
+              <a href="/login" style={{ width: "100%" }}>
                 <button className="es-btn" type="button" style={{ margin: 0 }}>
                   Ir para o login
                 </button>
               </a>
             </>
           )}
-
         </div>
       </div>
     </>
