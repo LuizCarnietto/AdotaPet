@@ -1,5 +1,6 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
+import { apiService } from "@/services/ApiService";
 
 type Etapa = "email" | "codigo" | "novaSenha" | "sucesso";
 
