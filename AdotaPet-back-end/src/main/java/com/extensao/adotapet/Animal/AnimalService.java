@@ -41,6 +41,8 @@ public class AnimalService {
         Animal animal = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Animal não encontrado"));
 
+        validarPermissaoDaOng(animal);
+
         if (dto.getNome() != null) {
             animal.setNome(dto.getNome());
         }
@@ -465,5 +467,28 @@ public class AnimalService {
                 );
 
         return listarAnimaisDaOng(ong);
+    }
+
+    private void validarPermissaoDaOng(Animal animal) {
+
+        Authentication auth = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("Usuário não autenticado");
+        }
+
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        if (!TipoUsuario.ROLE_ONG.equals(usuario.getTipoUsuario())) {
+            throw new RuntimeException("Apenas ONGs podem editar animais");
+        }
+
+        if (animal.getOng() == null ||
+                animal.getOng().getId() != usuario.getId()) {
+
+            throw new RuntimeException("Você não tem permissão para editar este animal");
+        }
     }
 }

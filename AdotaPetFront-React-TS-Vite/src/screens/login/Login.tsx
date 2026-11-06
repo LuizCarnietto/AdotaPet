@@ -26,9 +26,11 @@ export function Login() {
 
       const token = response.data.token;
       const tipoUsuario = response.data.tipoUsuario;
+      const usuarioId = response.data.id;
 
       localStorage.setItem("token", token);
       localStorage.setItem("tipoUsuario", tipoUsuario);
+      localStorage.setItem("usuarioId", usuarioId);
 
       if (tipoUsuario === "ROLE_ONG") {
         window.location.href="/";

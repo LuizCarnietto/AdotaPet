@@ -538,20 +538,16 @@ export default function PerfilOng() {
             </div>
           ) : animaisFiltrados.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {animaisFiltrados.map((animal) => (
-                <Link
-                  key={animal.id}
-                  to={`/listaadotar/DetalhesAnimal/${animal.id}`}
-                  className="block h-full rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#36c3ff]"
-                >
-                  <article className="group flex h-full flex-col overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+              {animaisFiltrados.map((animal) => {
+                const card = (
+                  <article className="flex h-full flex-col overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
                     <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
                       {animal.foto ? (
                         <img
                           alt={`${animal.especie} ${animal.nome}`}
                           src={resolverUrlImagem(animal.foto)}
                           loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                          className="h-full w-full object-cover"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-gray-400">
@@ -563,7 +559,7 @@ export default function PerfilOng() {
                     <div className="flex flex-1 flex-col gap-4 p-5">
                       <div className="flex-1">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <h2 className="text-xl font-bold uppercase text-[#36c3ff] transition-colors duration-200 group-hover:text-[#168fc5]">
+                          <h2 className="text-xl font-bold uppercase text-[#36c3ff]">
                             {animal.nome}
                           </h2>
 
@@ -583,8 +579,22 @@ export default function PerfilOng() {
                       </div>
                     </div>
                   </article>
-                </Link>
-              ))}
+                );
+
+                return animal.status === "ADOTADO" ? (
+                  <div key={animal.id} className="h-full">
+                    {card}
+                  </div>
+                ) : (
+                  <Link
+                    key={animal.id}
+                    to={`/listaadotar/DetalhesAnimal/${animal.id}`}
+                    className="block h-full rounded-[20px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#36c3ff]"
+                  >
+                    {card}
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="flex min-h-64 flex-col items-center justify-center rounded-[20px] border border-gray-100 bg-white px-6 py-12 text-center">

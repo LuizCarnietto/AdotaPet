@@ -80,6 +80,7 @@ public class AuthService {
         String token = jwtUtil.generateToken(usuario);
 
         return Map.of(
+                "id", String.valueOf(usuario.getId()),
                 "token", token,
                 "tipoUsuario", usuario.getTipoUsuario().name()
         );

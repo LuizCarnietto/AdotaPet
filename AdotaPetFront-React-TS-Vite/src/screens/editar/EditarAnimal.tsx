@@ -19,7 +19,6 @@ export default function EdicaoAnimal() {
   const [especieSelecionada, setEspecieSelecionada] = useState("");
   const [descricaoAnimal, setDescricaoAnimal] = useState("");
 
-
   const [, setCarregandoAnimal] = useState(true);
 
   // Verifica se o usuário é uma ONG
@@ -180,6 +179,18 @@ export default function EdicaoAnimal() {
 
         const response = await apiService.get(`/animal/${id}`);
         const animal = response.data;
+
+        const usuarioId = localStorage.getItem("usuarioId");
+
+        if (
+          !usuarioId ||
+          !animal.ongId ||
+          Number(animal.ongId) !== Number(usuarioId)
+        ) {
+          alert("Você não tem permissão para editar este animal.");
+          navigate("/cadastros/AnimaisCadastrados");
+          return;
+        }
 
         // Campos controlados pelo React
         setEspecieSelecionada(animal.especie || "");

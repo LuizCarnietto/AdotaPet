@@ -26,6 +26,7 @@ interface Animal {
   estadoSiglaOng?: string;
   fotoPerfilOng?: string | null;
   enderecoOng?: string | null;
+  status?: string;
 }
 
 const obterFotos = (fotos: string | string[] | null | undefined): string[] => {
@@ -74,6 +75,8 @@ export default function DetalhesAnimal() {
 
   const ehAdotante =
     tipoUsuario.includes("ADOTANTE") || tipoUsuario.includes("ADOTADOR");
+
+  const animalAdotado = animal?.status?.toUpperCase() === "ADOTADO";
 
   useEffect(() => {
     const buscarAnimal = async () => {
@@ -134,6 +137,10 @@ export default function DetalhesAnimal() {
   };
 
   const handleAdotar = () => {
+    if (animal?.status?.toUpperCase() === "ADOTADO") {
+      return;
+    }
+
     if (!token || !tipoUsuario) {
       navigate("/login");
       return;
@@ -924,7 +931,20 @@ export default function DetalhesAnimal() {
             </div>
           </div>
 
-          {tipoUsuario === "ROLE_ONG" ? (
+          {animalAdotado ? (
+            <button
+              id="botaoAzul"
+              type="button"
+              disabled
+              style={{
+                opacity: 0.6,
+                cursor: "not-allowed",
+                backgroundColor: "#9CA3AF",
+              }}
+            >
+              Animal já adotado
+            </button>
+          ) : tipoUsuario === "ROLE_ONG" ? (
             <button
               id="botaoAzul"
               type="button"
