@@ -137,4 +137,3 @@ Os diagramas completos (casos de uso, classes e entidade-relacionamento) estão 
 
 - Bruno Broietti Serenato
 - Luiz Carnietto
-- Luis Filipe Anklan
