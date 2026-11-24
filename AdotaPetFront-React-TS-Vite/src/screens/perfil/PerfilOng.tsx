@@ -59,6 +59,12 @@ interface PerfilOngDados {
   tipoChavePix?: string | null;
   chavePix?: string | null;
   titularPix?: string | null;
+
+  instagram?: string | null;
+  facebook?: string | null;
+  tiktok?: string | null;
+  twitter?: string | null;
+  site?: string | null;
 }
 
 const ESTADOS_POR_SIGLA: Record<string, string> = {
@@ -233,6 +239,29 @@ function extrairListaAnimais(dados: unknown): AnimalApi[] {
   }
 
   return [];
+}
+
+function gerarUrlRedeSocial(nome: string, valor: string): string {
+  const texto = valor.trim();
+
+  if (/^https?:\/\//i.test(texto)) {
+    return texto;
+  }
+
+  if (nome === "Site oficial") {
+    return `https://${texto}`;
+  }
+
+  const usuario = texto.replace(/^@/, "");
+
+  const bases: Record<string, string> = {
+    Instagram: "https://www.instagram.com/",
+    Facebook: "https://www.facebook.com/",
+    TikTok: "https://www.tiktok.com/@",
+    "Twitter / X": "https://x.com/",
+  };
+
+  return `${bases[nome]}${usuario}`;
 }
 
 export default function PerfilOng() {
@@ -671,7 +700,7 @@ export default function PerfilOng() {
             </div>
 
             <div className="flex flex-col gap-3">
-              {perfil?.email && (
+              {perfil?.email?.trim() && (
                 <a
                   href={`mailto:${perfil.email}`}
                   className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[20px] border border-gray-200 bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#bceaff] hover:bg-[#EAF8FF] hover:text-[#168fc5]"
@@ -693,11 +722,44 @@ export default function PerfilOng() {
                 </a>
               )}
 
-              {!perfil?.email && !numeroWhatsApp && (
-                <p className="rounded-[20px] bg-[#F8FAFC] p-4 text-sm text-gray-500">
-                  A ONG ainda não cadastrou um e-mail ou telefone para contato.
-                </p>
-              )}
+              {[
+                { nome: "Instagram", valor: perfil?.instagram },
+                { nome: "Facebook", valor: perfil?.facebook },
+                { nome: "TikTok", valor: perfil?.tiktok },
+                { nome: "Twitter / X", valor: perfil?.twitter },
+                { nome: "Site oficial", valor: perfil?.site },
+              ]
+                .filter((rede) => rede.valor?.trim())
+                .map((rede) => {
+                  const valor = rede.valor!.trim();
+
+                  const url = gerarUrlRedeSocial(rede.nome, valor);
+
+                  return (
+                    <a
+                      key={rede.nome}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[20px] border border-gray-200 bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#bceaff] hover:bg-[#EAF8FF] hover:text-[#168fc5]"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      {rede.nome}
+                    </a>
+                  );
+                })}
+
+              {!perfil?.email?.trim() &&
+                !numeroWhatsApp &&
+                !perfil?.instagram?.trim() &&
+                !perfil?.facebook?.trim() &&
+                !perfil?.tiktok?.trim() &&
+                !perfil?.twitter?.trim() &&
+                !perfil?.site?.trim() && (
+                  <p className="rounded-[20px] bg-[#F8FAFC] p-4 text-sm text-gray-500">
+                    A ONG ainda não cadastrou contatos ou redes sociais.
+                  </p>
+                )}
             </div>
           </div>
         </section>
