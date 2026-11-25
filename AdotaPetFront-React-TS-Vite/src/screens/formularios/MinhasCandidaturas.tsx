@@ -189,7 +189,21 @@ export default function MinhasCandidaturas() {
                   key={candidatura.id}
                   className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm flex flex-col"
                 >
-                  <div className="p-5 flex gap-4 items-center">
+                  <div
+                    className="p-5 flex gap-4 items-center cursor-pointer hover:bg-slate-50 transition-colors"
+                    onClick={() => {
+                      if (animal?.id) {
+                        navigate(`/listaadotar/DetalhesAnimal/${animal.id}`);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && animal?.id) {
+                        navigate(`/listaadotar/DetalhesAnimal/${animal.id}`);
+                      }
+                    }}
+                  >
                     <div className="w-24 h-24 shrink-0 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center">
                       {imagem ? (
                         <img

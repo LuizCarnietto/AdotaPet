@@ -1109,7 +1109,7 @@ export default function EditarPerfilOng() {
               <button
                 type="submit"
                 disabled={carregandoPerfil || salvando}
-                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-[#006286] to-[#1eb7f5] px-6 py-2.5 text-sm font-bold text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-[#006286] to-[#1eb7f5] px-6 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:from-[#004d69] hover:to-[#009bd8] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
               >
                 <CheckCircle2 size={18} />
                 {salvando ? "Salvando..." : "Salvar alterações"}

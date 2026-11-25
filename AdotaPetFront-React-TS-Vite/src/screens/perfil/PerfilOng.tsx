@@ -490,7 +490,7 @@ export default function PerfilOng() {
                     <button
                       type="button"
                       onClick={() => navigate("/perfil/EditarPerfilOng")}
-                      className="inline-flex items-center gap-2 rounded-[20px] border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-[#36c3ff] hover:bg-[#EAF8FF] hover:text-[#168fc5] active:scale-[0.98]"
+                      className="inline-flex items-center gap-2 rounded-[22px] border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:border-[#36c3ff] hover:bg-[#EAF8FF] hover:text-[#168fc5] active:scale-[0.98]"
                     >
                       <Pencil className="h-4 w-4" />
                       Editar perfil
@@ -502,7 +502,7 @@ export default function PerfilOng() {
                     title="Compartilhar perfil"
                     aria-label="Compartilhar perfil da ONG"
                     onClick={compartilhar}
-                    className="inline-flex h-[42px] w-[46px] items-center justify-center rounded-[20px] border border-gray-200 bg-white text-gray-700 transition-all duration-200 hover:border-[#36c3ff] hover:bg-[#EAF8FF] hover:text-[#168fc5] active:scale-[0.98]"
+                    className="inline-flex h-[42px] w-[46px] items-center justify-center rounded-[22px] border border-gray-200 bg-white text-gray-700 transition-all duration-200 hover:border-[#36c3ff] hover:bg-[#EAF8FF] hover:text-[#168fc5] active:scale-[0.98]"
                   >
                     <Share2 className="h-4 w-4" />
                   </button>
