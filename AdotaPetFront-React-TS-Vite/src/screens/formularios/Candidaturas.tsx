@@ -670,7 +670,7 @@ function Estilos() {
           align-items: center;
           gap: 9px;
 
-          padding: 11px 18px;
+          padding: 6px 10px;
           border: 1px solid #e5e7eb;
           border-radius: 20px;
 

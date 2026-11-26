@@ -20,7 +20,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute.tsx";
 
 
 export const routesList = createBrowserRouter([
-  // ---------- PÚBLICAS ----------
+  // Rotas públicas
   { path: ROOT_PATH, element: <HomePage /> },
   { path: "/login", element: <Login /> },
   { path: "/login/EsqueceuSenha", element: <EsqueceuSenha /> },
@@ -30,7 +30,7 @@ export const routesList = createBrowserRouter([
   { path: "/listaadotar/DetalhesAnimal/:id", element: <DetalhesAnimal /> },
   { path: "/ong/:ongId", element: <PerfilOng /> }, // ✅ pública
 
-  // ---------- SÓ ONG ----------
+  // Só ong
   {
     element: <ProtectedRoute tiposPermitidos={["ROLE_ONG"]} />,
     children: [
@@ -43,13 +43,22 @@ export const routesList = createBrowserRouter([
     ],
   },
 
-  // ---------- SÓ ADOTANTE ----------
+  // Só adotante
   {
     element: <ProtectedRoute tiposPermitidos={["ROLE_ADOTANTE"]} />,
     children: [
       { path: "/perfil/PerfilAdotante", element: <PerfilAdotante /> },
       { path: "/minhas-candidaturas", element: <MinhasCandidaturas /> },
-      { path: "/formularios", element: <FormularioAdocao /> },
     ],
   },
+
+  // Formulário de adoção
+{
+  element: (
+    <ProtectedRoute tiposPermitidos={["ROLE_ADOTANTE", "ROLE_ONG"]} />
+  ),
+  children: [
+    { path: "/formularios", element: <FormularioAdocao /> },
+  ],
+},
 ]);
