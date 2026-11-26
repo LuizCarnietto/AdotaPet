@@ -16,6 +16,8 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/themes": "^2.0.0",
     "axios": "^1.6.0",
+    "baseline-browser-mapping": "^2.11.39",
+    "caniuse-lite": "^1.0.30001828",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
