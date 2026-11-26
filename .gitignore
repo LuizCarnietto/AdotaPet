@@ -1,0 +1,32 @@
+
+# Frontend - React / Vite
+node_modules/
+dist/
+.vite/
+coverage/
+
+# Backend - Spring Boot / Java
+target/
+build/
+.gradle/
+*.class
+*.jar
+*.war
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
