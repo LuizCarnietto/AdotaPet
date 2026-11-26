@@ -703,7 +703,7 @@ export default function PerfilOng() {
               {perfil?.email?.trim() && (
                 <a
                   href={`mailto:${perfil.email}`}
-                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[20px] border border-gray-200 bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#bceaff] hover:bg-[#EAF8FF] hover:text-[#168fc5]"
+                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[22px] border border-gray-200 bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#bceaff] hover:bg-[#EAF8FF] hover:text-[#168fc5]"
                 >
                   <Mail className="h-4 w-4" />
                   Enviar e-mail
@@ -715,7 +715,7 @@ export default function PerfilOng() {
                   href={`https://wa.me/${numeroWhatsApp}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[20px] border border-[#36c3ff] bg-[#36c3ff] px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-[#168fc5] hover:bg-[#168fc5]"
+                  className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[22px] border border-[#36c3ff] bg-[#36c3ff] hover:bg-[rgb(26,176,240)] px-4 py-3 text-sm font-semibold text-white transition-colors hover:border-[rgb(26,176,240)]"
                 >
                   <Phone className="h-4 w-4" />
                   Conversar pelo WhatsApp
@@ -741,7 +741,7 @@ export default function PerfilOng() {
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[20px] border border-gray-200 bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#bceaff] hover:bg-[#EAF8FF] hover:text-[#168fc5]"
+                      className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-[22px] border border-gray-200 bg-[#F8FAFC] px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:border-[#bceaff] hover:bg-[#EAF8FF] hover:text-[#168fc5]"
                     >
                       <ExternalLink className="h-4 w-4" />
                       {rede.nome}
@@ -756,7 +756,7 @@ export default function PerfilOng() {
                 !perfil?.tiktok?.trim() &&
                 !perfil?.twitter?.trim() &&
                 !perfil?.site?.trim() && (
-                  <p className="rounded-[20px] bg-[#F8FAFC] p-4 text-sm text-gray-500">
+                  <p className="rounded-[22px] bg-[#F8FAFC] p-4 text-sm text-gray-500">
                     A ONG ainda não cadastrou contatos ou redes sociais.
                   </p>
                 )}
@@ -766,7 +766,7 @@ export default function PerfilOng() {
 
         {/* Card de doações */}
         {perfil?.pixAtivo === true && (
-          <section className="rounded-[20px] border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
+          <section className="rounded-[22px] border border-gray-100 bg-white p-6 shadow-sm sm:p-8">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF8FF] text-[#168fc5]">
                 <HeartHandshake className="h-6 w-6" />

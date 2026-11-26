@@ -85,7 +85,7 @@ const inputClass =
 const labelClass =
   "mb-2 block text-xs font-semibold uppercase tracking-wider text-[#595c5d]";
 const secondaryButton =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[22px] bg-[#dce4e9] px-4 py-2.5 text-sm font-semibold text-[#4b5358] transition-colors duration-200 hover:bg-[#c5dce7] hover:text-[#006286] active:bg-[#b5d1df]";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[22px] bg-[#dce4e9] px-4 py-2.5 text-sm font-semibold text-[#4b5358] transition-colors duration-150 hover:bg-[#c5dce7] hover:text-[#006286] active:bg-[#b5d1df]";
 const cardClass =
   "space-y-6 rounded-[24px] bg-white p-6 shadow-[0_12px_32px_rgba(44,47,48,0.05)] sm:p-8";
 
@@ -532,7 +532,6 @@ export default function EditarPerfilOng() {
         )}
 
         <form className="space-y-8 pb-8" onSubmit={salvarPerfil}>
-          {/* Imagens sem conteúdo fictício: a ONG envia as próprias fotos. */}
           <section className="overflow-hidden rounded-[24px] bg-white shadow-[0_12px_32px_rgba(44,47,48,0.05)]">
             <div className="group relative h-48 overflow-hidden bg-[#e8eef1] sm:h-64">
               {coverPhoto ? (
@@ -554,7 +553,7 @@ export default function EditarPerfilOng() {
                   <button
                     type="button"
                     onClick={() => removerFoto("capa")}
-                    className="inline-flex min-h-10 items-center gap-2 rounded-[20px] bg-white/95 px-3 py-2 text-xs font-semibold text-[#4b5358] shadow-sm transition-colors duration-200 hover:bg-red-100 hover:text-red-700 active:bg-red-200"
+                    className="inline-flex min-h-10 items-center gap-2 rounded-[20px] bg-white/95 px-3 py-2 text-xs font-semibold text-[#4b5358] shadow-sm transition-colors duration-150 hover:bg-red-100 hover:text-red-700 active:bg-red-200"
                   >
                     <Trash2 size={15} /> Remover
                   </button>
@@ -562,7 +561,7 @@ export default function EditarPerfilOng() {
                 <button
                   type="button"
                   onClick={() => coverInputRef.current?.click()}
-                  className="inline-flex min-h-10 items-center gap-2 rounded-[22px] bg-white/95 px-4 py-2 text-xs font-semibold text-[#2c2f30] shadow-md transition-colors duration-200 hover:bg-[#dff5ff] hover:text-[#006286] active:bg-[#c5edff]"
+                  className="inline-flex min-h-10 items-center gap-2 rounded-[22px] bg-white/95 px-4 py-2 text-xs font-semibold text-[#2c2f30] shadow-md transition-colors duration-150 hover:bg-[#dff5ff] hover:text-[#006286] active:bg-[#c5edff]"
                 >
                   <Camera size={16} className="text-[#006286]" />{" "}
                   {coverPhoto ? "Alterar capa" : "Adicionar capa"}
@@ -627,7 +626,7 @@ export default function EditarPerfilOng() {
                   <button
                     type="button"
                     onClick={() => profileInputRef.current?.click()}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-[#006286] to-[#1eb7f5] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:from-[#004d69] hover:to-[#009bd8] hover:shadow-md active:scale-[0.98]"
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[22px] bg-[#36c3ff] hover:bg-[rgb(26,176,240)] px-5 py-2.5 text-sm font-semibold text-white transition-all duration-150 hover:shadow-md active:scale-[0.98]"
                   >
                     <Upload size={16} />{" "}
                     {profilePhoto ? "Alterar foto" : "Adicionar foto"}
@@ -1109,7 +1108,7 @@ export default function EditarPerfilOng() {
               <button
                 type="submit"
                 disabled={carregandoPerfil || salvando}
-                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[22px] bg-gradient-to-r from-[#006286] to-[#1eb7f5] px-6 py-2.5 text-sm font-bold text-white transition-all duration-200 hover:from-[#004d69] hover:to-[#009bd8] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[22px] bg-[#36c3ff] hover:bg-[rgb(26,176,240)] px-6 py-2.5 text-sm font-bold text-white transition-all duration-150 hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none"
               >
                 <CheckCircle2 size={18} />
                 {salvando ? "Salvando..." : "Salvar alterações"}
@@ -1134,7 +1133,7 @@ export default function EditarPerfilOng() {
         )}
       </main>
 
-      <footer className="mt-8 border-t border-gray-200 bg-white">
+      <footer className="mt-8 border-t border-gray-150 bg-white">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-5 px-6 py-8 text-center sm:flex-row sm:text-left">
           <div>
             <span className="text-lg font-bold text-[#168fc5]">Adota Pet</span>
@@ -1151,21 +1150,21 @@ export default function EditarPerfilOng() {
           <nav className="flex flex-wrap justify-center gap-x-5 gap-y-3 text-xs font-medium text-gray-500">
             <Link
               to="/termos"
-              className="transition-colors duration-200 hover:text-[#168fc5]"
+              className="transition-colors duration-150 hover:text-[#168fc5]"
             >
               Termos de adoção
             </Link>
 
             <Link
               to="/privacidade"
-              className="transition-colors duration-200 hover:text-[#168fc5]"
+              className="transition-colors duration-150 hover:text-[#168fc5]"
             >
               Política de privacidade
             </Link>
 
             <Link
               to="/"
-              className="transition-colors duration-200 hover:text-[#168fc5]"
+              className="transition-colors duration-150 hover:text-[#168fc5]"
             >
               Início
             </Link>

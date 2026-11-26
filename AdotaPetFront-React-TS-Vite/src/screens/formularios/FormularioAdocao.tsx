@@ -359,6 +359,30 @@ export default function FormularioAdocao() {
   const [formulario, setFormulario] =
     useState<FormularioState>(formularioInicial);
 
+  const camposPreenchidos =
+    [
+      formulario.nome,
+      formulario.nascimento,
+      formulario.cpf,
+      formulario.estadoCivil,
+      formulario.profissao,
+      formulario.trabalho,
+      formulario.ddd,
+      formulario.telefone,
+      formulario.email,
+      formulario.cep,
+      formulario.cidade,
+      formulario.uf,
+      formulario.estado,
+      formulario.bairro,
+      formulario.complemento,
+      formulario.logradouro,
+      formulario.numero,
+    ].every((campo) => campo.trim() !== "") &&
+    formulario.respostas.every((resposta) => resposta.trim() !== "");
+
+  const podeEnviar = camposPreenchidos && aceito;
+
   const [estados, setEstados] = useState<Estado[]>([]);
   const [cidades, setCidades] = useState<Cidade[]>([]);
   const [estadoId, setEstadoId] = useState<number | null>(null);
@@ -501,6 +525,10 @@ export default function FormularioAdocao() {
   const enviarFormulario = async () => {
     if (!animalId) {
       alert("Animal não identificado.");
+      return;
+    }
+    if (!camposPreenchidos) {
+      alert("Preencha todos os campos do formulário antes de enviar.");
       return;
     }
 
@@ -1074,7 +1102,7 @@ export default function FormularioAdocao() {
                 <button
                   type="button"
                   onClick={enviarFormulario}
-                  disabled={!aceito}
+                  disabled={!podeEnviar}
                   className="px-10 py-3 rounded-full bg-sky-400 text-white font-bold text-base hover:bg-sky-500 transition disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
                 >
                   Enviar Formulário
