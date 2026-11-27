@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {  useTituloPagina } from "../../hooks/useTituloPagina";
 import {
   CalendarDays,
   ClipboardList,
@@ -69,6 +70,7 @@ function formatarData(data?: string) {
 }
 
 export default function MinhasCandidaturas() {
+  useTituloPagina("Minhas Candidaturas");
   const navigate = useNavigate();
 
   const [candidaturas, setCandidaturas] = useState<Candidatura[]>([]);

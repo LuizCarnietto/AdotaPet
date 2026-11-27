@@ -1,6 +1,7 @@
 import { useEffect, useState, ChangeEvent, ReactNode } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { apiService } from "@/services/ApiService";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 import axios from "axios";
 
 interface AnimalInfo {
@@ -340,6 +341,7 @@ const formatarDDD = (valor: string) => {
 };
 
 export default function FormularioAdocao() {
+  useTituloPagina("Formulário de Adoção");
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 

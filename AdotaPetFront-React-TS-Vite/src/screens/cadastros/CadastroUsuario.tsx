@@ -1,6 +1,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "../../services/ApiService";
+import { useTituloPagina } from "../../hooks/useTituloPagina";
 
 type TipoConta = "usuario" | "ong";
 
@@ -95,6 +96,7 @@ function formatarTelefone(valor: string) {
 }
 
 export default function CadastroUsuario() {
+  useTituloPagina("Cadastro");
   const navigate = useNavigate();
   const [tipoConta, setTipoConta] = useState<TipoConta>("usuario");
 

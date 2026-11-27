@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { apiService } from "@/services/ApiService";
+import { useTituloPagina } from "../../hooks/useTituloPagina";
 
 type PerfilAdotante = {
   nome: string;
@@ -94,6 +95,7 @@ function mensagemErro(error: unknown) {
 }
 
 export default function PerfilAdotante() {
+  useTituloPagina("Editar Perfil");
   const [perfil, setPerfil] = useState<PerfilAdotante | null>(null);
 
   const [formData, setFormData] = useState<FormularioPerfil>({

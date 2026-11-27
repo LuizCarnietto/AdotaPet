@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "@/services/ApiService";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 
 // Importante:
 // aqui sempre tenho que usar o mesmo import do Header que existe em ListaAdotar.tsx
@@ -87,6 +88,7 @@ const formatarStatus = (status?: string) => {
 };
 
 export default function AnimaisCadastrados() {
+  useTituloPagina("Animais Cadastrados");
   const navigate = useNavigate();
 
   const [animais, setAnimais] = useState<AnimaisCadastrados[]>([]);

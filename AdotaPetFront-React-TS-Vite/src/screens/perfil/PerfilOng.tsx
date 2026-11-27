@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { apiService } from "@/services/ApiService";
+import { useTituloPagina } from "../../hooks/useTituloPagina";
 
 type AbaAnimais = "DISPONIVEL" | "ADOTADO";
 
@@ -265,6 +266,7 @@ function gerarUrlRedeSocial(nome: string, valor: string): string {
 }
 
 export default function PerfilOng() {
+  useTituloPagina("Editar Perfil");
   const navigate = useNavigate();
 
   const { ongId } = useParams<{ ongId: string }>();

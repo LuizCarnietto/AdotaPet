@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent, ReactNode } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 import {
   Building2,
   Camera,
@@ -140,6 +141,7 @@ function formatarTelefone(valor: string) {
 }
 
 export default function EditarPerfilOng() {
+  useTituloPagina("Editar Perfil");
   const navigate = useNavigate();
   const [formData, setFormData] = useState(FORMULARIO_VAZIO);
   const [perfilOriginal, setPerfilOriginal] = useState<PerfilOngApi | null>(

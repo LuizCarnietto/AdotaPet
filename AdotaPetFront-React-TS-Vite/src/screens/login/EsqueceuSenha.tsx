@@ -1,6 +1,7 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import axios from "axios";
 import { apiService } from "@/services/ApiService";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 
 type Etapa = "email" | "codigo" | "novaSenha" | "sucesso";
 
@@ -12,6 +13,7 @@ interface FormState {
 }
 
 export default function EsqueceuSenha() {
+  useTituloPagina("Recuperação de Senha");
   const [etapa, setEtapa] = useState<Etapa>("email");
   const [form, setForm] = useState<FormState>({
     email: "",

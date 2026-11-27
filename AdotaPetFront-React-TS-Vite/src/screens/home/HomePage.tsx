@@ -30,15 +30,41 @@ const comoFuncionaItems = [
 ];
 
 const faqEsquerdo = [
-  "Como o site garante que as ONGs e animais cadastrados são confiáveis?",
-  "Como faço para adotar um pet pelo site?",
-  "Posso adotar um pet de outra cidade/estado?",
+  {
+    pergunta:
+      "Como o site garante que as ONGs e animais cadastrados são confiáveis?",
+    resposta:
+      "O AdotaPet conecta pessoas interessadas em adotar com ONGs e protetores responsáveis pelos animais. As informações e fotos dos pets são fornecidas pelas próprias organizações. Recomendamos que o adotante converse com a ONG, tire suas dúvidas e conheça o animal antes de concluir a adoção.",
+  },
+  {
+    pergunta: "Como faço para adotar um pet pelo site?",
+    resposta:
+      "Primeiro, crie uma conta como adotante. Depois, acesse a página de animais disponíveis, escolha o pet que deseja conhecer e preencha o formulário de adoção. A ONG responsável analisará sua candidatura e poderá entrar em contato para conversar e combinar os próximos passos.",
+  },
+  {
+    pergunta: "Posso adotar um pet de outra cidade/estado?",
+    resposta:
+      "Sim! Você pode demonstrar interesse por animais de outras cidades ou estados. Porém, é importante conversar com a ONG responsável para verificar a possibilidade de visita, transporte e entrega do animal. Essas condições dependem da organização.",
+  },
 ];
 
 const faqDireito = [
-  "Quais informações são obrigatórias para cadastrar um animal para adoção?",
-  "Como minha ONG pode se cadastrar no site?",
-  "Existe algum custo para usar a plataforma?",
+  {
+    pergunta:
+      "Quais informações são obrigatórias para cadastrar um animal para adoção?",
+    resposta:
+      "É importante informar o nome do animal, espécie, idade aproximada, sexo, porte, localização e características de comportamento. Também recomendamos adicionar fotos e informações sobre vacinação, castração, saúde e histórico do pet, para ajudar os interessados a conhecê-lo melhor.",
+  },
+  {
+    pergunta: "Como minha ONG pode se cadastrar no site?",
+    resposta:
+      "Acesse a opção de cadastro e escolha o perfil de ONG. Preencha as informações solicitadas e conclua seu cadastro. Depois, faça login para acessar as funcionalidades destinadas às organizações e cadastrar os animais disponíveis para adoção.",
+  },
+  {
+    pergunta: "Existe algum custo para usar a plataforma?",
+    resposta:
+      "Não! O AdotaPet é uma plataforma gratuita, desenvolvida para aproximar ONGs, protetores e pessoas interessadas em adotar. O objetivo é facilitar o processo de adoção responsável e ajudar mais animais a encontrarem um lar.",
+  },
 ];
 
 export default function HomePage() {
@@ -209,30 +235,39 @@ export default function HomePage() {
       {/* FAQ */}
       <div id="faq" style={styles.faqSection}>
         <h1 style={styles.faqTitulo}>Perguntas frequentes</h1>
+
         <div style={styles.faqGrid}>
           {/* Coluna esquerda */}
           <div style={styles.faqColuna}>
-            {faqEsquerdo.map((pergunta, i) => (
-              <div key={i}>
+            {faqEsquerdo.map((item, i) => (
+              <div key={i} style={styles.faqItem}>
                 <button
+                  type="button"
                   style={{
                     ...styles.botaoFaq,
                     backgroundColor:
                       faqAberto === i ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.4)",
                   }}
                   onClick={() => toggleFaq(i)}
+                  aria-expanded={faqAberto === i}
                 >
-                  {pergunta}
+                  {item.pergunta}
+                  <span>{faqAberto === i ? "−" : "+"}</span>
                 </button>
+
+                {faqAberto === i && (
+                  <div style={styles.faqResposta}>{item.resposta}</div>
+                )}
               </div>
             ))}
           </div>
 
           {/* Coluna direita */}
           <div style={styles.faqColuna}>
-            {faqDireito.map((pergunta, i) => (
-              <div key={i + 10}>
+            {faqDireito.map((item, i) => (
+              <div key={i + 10} style={styles.faqItem}>
                 <button
+                  type="button"
                   style={{
                     ...styles.botaoFaq,
                     backgroundColor:
@@ -241,9 +276,15 @@ export default function HomePage() {
                         : "rgba(0,0,0,0.4)",
                   }}
                   onClick={() => toggleFaq(i + 10)}
+                  aria-expanded={faqAberto === i + 10}
                 >
-                  {pergunta}
+                  {item.pergunta}
+                  <span>{faqAberto === i + 10 ? "−" : "+"}</span>
                 </button>
+
+                {faqAberto === i + 10 && (
+                  <div style={styles.faqResposta}>{item.resposta}</div>
+                )}
               </div>
             ))}
           </div>
@@ -492,6 +533,26 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 53,
     width: "40%",
   },
+
+  faqItem: {
+    display: "flex",
+    flexDirection: "column",
+    width: "100%",
+    gap: 12,
+  },
+
+  faqResposta: {
+    backgroundColor: "rgba(255,255,255,0.9)",
+    color: "#222",
+    borderRadius: 20,
+    padding: "20px 24px",
+    fontFamily: "'Montserrat', sans-serif",
+    fontSize: 15,
+    lineHeight: 1.7,
+    boxShadow: "0px 4px 10px rgba(0,0,0,0.12)",
+    animation: "faqDescer 0.25s ease",
+  },
+
   botaoFaq: {
     backgroundColor: "rgba(0,0,0,0.4)",
     border: "none",
@@ -505,5 +566,10 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: "pointer",
     transition: "background-color 0.2s",
     textAlign: "center",
+
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
   },
 };

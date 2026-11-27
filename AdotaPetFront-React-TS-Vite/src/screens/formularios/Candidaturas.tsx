@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTituloPagina } from "../../hooks/useTituloPagina";
 import {
   ArrowLeft,
   CalendarDays,
@@ -66,6 +67,7 @@ interface Candidatura {
 
 export default function Candidaturas() {
   const navigate = useNavigate();
+  useTituloPagina("Candidaturas");
 
   const [candidaturas, setCandidaturas] = useState<Candidatura[]>([]);
   type FiltroCandidatura = "pendentes" | "aprovadas" | "reprovadas" | "todas";

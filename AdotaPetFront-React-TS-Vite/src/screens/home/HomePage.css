@@ -6,3 +6,15 @@
   font-size: clamp(56px, 5vw, 96px) !important;
   line-height: 0.75 !important;
 }
+
+@keyframes faqDescer {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

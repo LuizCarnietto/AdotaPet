@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "../../services/ApiService";
 import { Header } from "@/components/Header";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 
 export default function RegistroAnimal() {
+  useTituloPagina("Registro do Animal");
   const navigate = useNavigate();
 
   const [estados, setEstados] = useState<any[]>([]);

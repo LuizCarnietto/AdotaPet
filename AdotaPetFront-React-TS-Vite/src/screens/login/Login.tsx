@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { apiService } from "../../services/ApiService";
+import { useTituloPagina } from "../../hooks/useTituloPagina";
 
 export function Login() {
+  useTituloPagina("Login");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiService } from "@/services/ApiService";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 
 type TipoConta = "usuario" | "ong";
 
 export default function CadastroOng() {
+  useTituloPagina("Cadastro");
   const [nome, setNome] = useState("");
   const [nomeOng, setNomeOng] = useState("");
   const [telefone, setTelefone] = useState("");

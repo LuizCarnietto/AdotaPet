@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { apiService } from "../../services/ApiService";
 import { Header } from "@/components/Header";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 
 export default function EdicaoAnimal() {
+  useTituloPagina("Editar Animal");
   const navigate = useNavigate();
   const { id } = useParams();
 

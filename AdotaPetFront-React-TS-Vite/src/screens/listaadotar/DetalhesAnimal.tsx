@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link, useParams } from "react-router-dom";
 import { apiService } from "@/services/ApiService";
 import { Header } from "@/components/Header";
+import { useTituloPagina } from "@/hooks/useTituloPagina";
 
 interface Animal {
   id: number;
@@ -60,6 +61,7 @@ const obterFotos = (fotos: string | string[] | null | undefined): string[] => {
 };
 
 export default function DetalhesAnimal() {
+  useTituloPagina("Detalhes do Animal");
   const { id } = useParams<{ id: string }>();
 
   const [animal, setAnimal] = useState<Animal | null>(null);
@@ -134,7 +136,7 @@ export default function DetalhesAnimal() {
     if (possuiChip === false) return "Não";
 
     return "Não informado";
-  }; 
+  };
 
   const handleAdotar = () => {
     if (animal?.status?.toUpperCase() === "ADOTADO") {
