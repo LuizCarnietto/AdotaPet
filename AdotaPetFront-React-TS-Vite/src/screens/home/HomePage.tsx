@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import "./HomePage.css";
@@ -7,8 +7,6 @@ const token = localStorage.getItem("token");
 const estaLogado = !!token;
 
 const tipoUsuario = localStorage.getItem("tipoUsuario");
-
-const ehAdotante = tipoUsuario === "ROLE_ADOTANTE";
 const ehOng = tipoUsuario === "ROLE_ONG";
 
 const comoFuncionaItems = [

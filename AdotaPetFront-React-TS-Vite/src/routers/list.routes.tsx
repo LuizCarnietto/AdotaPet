@@ -18,7 +18,6 @@ import EditarPerfilOng from "@/screens/editar/EditarPerfilOng.tsx";
 import PerfilAdotante from "@/screens/perfil/PerfilAdotante.tsx";
 import { ProtectedRoute } from "@/components/ProtectedRoute.tsx";
 
-
 export const routesList = createBrowserRouter([
   // Rotas públicas
   { path: ROOT_PATH, element: <HomePage /> },
@@ -37,7 +36,10 @@ export const routesList = createBrowserRouter([
       { path: "/perfil/PerfilOng", element: <PerfilOng /> },
       { path: "/perfil/EditarPerfilOng", element: <EditarPerfilOng /> },
       { path: "/cadastros/RegistroAnimal", element: <RegistroAnimal /> },
-      { path: "/cadastros/AnimaisCadastrados", element: <AnimaisCadastrados /> },
+      {
+        path: "/cadastros/AnimaisCadastrados",
+        element: <AnimaisCadastrados />,
+      },
       { path: "/editar/animal/:id", element: <EditarAnimal /> },
       { path: "/candidaturas", element: <Candidaturas /> },
     ],
@@ -53,12 +55,8 @@ export const routesList = createBrowserRouter([
   },
 
   // Formulário de adoção
-{
-  element: (
-    <ProtectedRoute tiposPermitidos={["ROLE_ADOTANTE", "ROLE_ONG"]} />
-  ),
-  children: [
-    { path: "/formularios", element: <FormularioAdocao /> },
-  ],
-},
+  {
+    element: <ProtectedRoute tiposPermitidos={["ROLE_ADOTANTE", "ROLE_ONG"]} />,
+    children: [{ path: "/formularios", element: <FormularioAdocao /> }],
+  },
 ]);

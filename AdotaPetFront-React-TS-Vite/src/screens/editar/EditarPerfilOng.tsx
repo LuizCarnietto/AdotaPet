@@ -16,7 +16,6 @@ import {
   Instagram,
   Mail,
   MapPin,
-  MessageCircle,
   PawPrint,
   Phone,
   QrCode,

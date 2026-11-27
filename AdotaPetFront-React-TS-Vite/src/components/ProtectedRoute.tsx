@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-type TipoPerfil = "ADOTANTE" | "ONG";
+type TipoPerfil = "ROLE_ADOTANTE" | "ROLE_ONG";
 
 interface ProtectedRouteProps {
   tiposPermitidos?: TipoPerfil[];

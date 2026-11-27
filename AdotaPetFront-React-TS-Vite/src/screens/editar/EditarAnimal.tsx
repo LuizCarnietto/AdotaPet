@@ -329,10 +329,6 @@ export default function EdicaoAnimal() {
         "#descricaoAnimal > input",
       ) as HTMLInputElement | null;
 
-      const descricaoInput = document.querySelector(
-        "#descricaoAnimal textarea",
-      ) as HTMLTextAreaElement | null;
-
       const idadeInput = document.getElementById(
         "idade",
       ) as HTMLSelectElement | null;
