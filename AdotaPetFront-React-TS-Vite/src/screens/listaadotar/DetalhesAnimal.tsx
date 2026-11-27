@@ -134,7 +134,7 @@ export default function DetalhesAnimal() {
     if (possuiChip === false) return "Não";
 
     return "Não informado";
-  };
+  }; 
 
   const handleAdotar = () => {
     if (animal?.status?.toUpperCase() === "ADOTADO") {
@@ -942,7 +942,7 @@ export default function DetalhesAnimal() {
                 backgroundColor: "#9CA3AF",
               }}
             >
-              Animal já adotado
+              Indisponível
             </button>
           ) : tipoUsuario === "ROLE_ONG" ? (
             <button

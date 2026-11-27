@@ -48,6 +48,24 @@ public class AdocaoController {
         );
     }
 
+    @PatchMapping("/{id}/cancelar")
+    public void cancelarCandidatura(
+            @PathVariable Long id
+    ) {
+
+        Authentication auth =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication();
+
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        respostaService.cancelarCandidatura(
+                id,
+                usuario
+        );
+    }
+
     @GetMapping("/{id}")
     public RespostaAdocaoResponseDTO buscarPorId(
             @PathVariable Long id
@@ -90,5 +108,16 @@ public class AdocaoController {
         Usuario usuario = (Usuario) auth.getPrincipal();
 
         return respostaService.listarParaAdotante(usuario);
+    }
+
+    @PatchMapping("/{id}/finalizar")
+    public void finalizarAdocao(@PathVariable Long id) {
+
+        Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        Usuario usuario = (Usuario) auth.getPrincipal();
+
+        respostaService.finalizarAdocao(id, usuario);
     }
 }

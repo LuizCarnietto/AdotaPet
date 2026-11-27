@@ -21,6 +21,7 @@ import com.extensao.adotapet.FormularioAdocao.Dto.RespostaAdocaoResponseDTO;
 import com.extensao.adotapet.Enum.TipoUsuario;
 import org.springframework.transaction.annotation.Transactional;
 import com.extensao.adotapet.Notificacao.NotificacaoService;
+import java.util.Objects;
 
 import java.util.List;
 
@@ -107,13 +108,19 @@ public class FormularioAdocaoService {
 
     @Transactional
     public void atualizarStatus(Long idAdocao, StatusAdocao status, Usuario usuario) {
+        if (usuario.getTipoUsuario() != TipoUsuario.ROLE_ONG) {
+            throw new BusinessException(
+                    "Apenas ONGs podem alterar o status das candidaturas"
+            );
+        }
 
         RespostaAdocao adocao = respostaAdocaoRepository.findById(idAdocao)
                 .orElseThrow(() -> new NotFoundException("Candidatura não encontrada"));
 
         Animal animal = adocao.getAnimal();
 
-        if (animal.getOng() == null || animal.getOng().getId() != usuario.getId()) {
+        if (animal.getOng() == null
+                || !Objects.equals(animal.getOng().getId(), usuario.getId())) {
             throw new BusinessException(
                     "Você não tem permissão para alterar esta candidatura"
             );
@@ -123,10 +130,21 @@ public class FormularioAdocaoService {
             throw new BusinessException("Essa candidatura já foi processada");
         }
 
-        if (animal.getStatus() == Status.ADOTADO) {
-            throw new BusinessException("Animal já adotado");
+        if (status != StatusAdocao.APROVADO
+                && status != StatusAdocao.REPROVADO) {
+
+            throw new BusinessException(
+                    "Status inválido para análise da candidatura"
+            );
         }
 
+        if (status == StatusAdocao.APROVADO
+                && animal.getStatus() != Status.DISPONIVEL) {
+
+            throw new BusinessException(
+                    "Este animal não está mais disponível para adoção"
+            );
+        }
         adocao.setStatus(status);
         respostaAdocaoRepository.save(adocao);
 
@@ -152,7 +170,7 @@ public class FormularioAdocaoService {
         }
 
         if (status == StatusAdocao.APROVADO) {
-            animal.setStatus(Status.ADOTADO);
+            animal.setStatus(Status.EM_ANDAMENTO);
             animalRepository.save(animal);
 
             List<RespostaAdocao> outrasCandidaturas =
@@ -178,6 +196,136 @@ public class FormularioAdocaoService {
             respostaAdocaoRepository.saveAll(outrasCandidaturas);
         }
     }
+
+    @Transactional
+    public void cancelarCandidatura(Long idAdocao, Usuario usuario) {
+
+        if (usuario.getTipoUsuario() != TipoUsuario.ROLE_ADOTANTE) {
+            throw new BusinessException(
+                    "Apenas adotantes podem cancelar candidaturas"
+            );
+        }
+
+        RespostaAdocao adocao = respostaAdocaoRepository.findById(idAdocao)
+                .orElseThrow(() -> new NotFoundException(
+                        "Candidatura não encontrada"
+                ));
+
+        if (!Objects.equals(adocao.getUsuario().getId(), usuario.getId())) {
+            throw new BusinessException(
+                    "Você não tem permissão para cancelar esta candidatura"
+            );
+        }
+
+        StatusAdocao statusAtual = adocao.getStatus();
+
+        if (statusAtual != StatusAdocao.EM_ANALISE
+                && statusAtual != StatusAdocao.AGUARDANDO_APROVACAO
+                && statusAtual != StatusAdocao.APROVADO
+                && statusAtual != StatusAdocao.AGUARDANDO_RETIRADA) {
+
+            throw new BusinessException(
+                    "Esta candidatura não pode mais ser cancelada"
+            );
+        }
+
+        Animal animal = adocao.getAnimal();
+
+        // Verifica se a adoção já foi efetivamente concluída
+        if (statusAtual == StatusAdocao.CONCLUIDO
+                || animal.getStatus() == Status.ADOTADO) {
+
+            throw new BusinessException(
+                    "Não é possível cancelar uma adoção já concluída"
+            );
+        }
+
+        boolean estavaAprovada =
+                statusAtual == StatusAdocao.APROVADO
+                        || statusAtual == StatusAdocao.AGUARDANDO_RETIRADA;
+
+        adocao.setStatus(StatusAdocao.CANCELADO_PELO_ADOTANTE);
+
+        respostaAdocaoRepository.save(adocao);
+
+        // Devolve o animal para adoção se a candidatura estava aprovada
+        if (estavaAprovada && animal.getStatus() == Status.EM_ANDAMENTO) {
+
+            animal.setStatus(Status.DISPONIVEL);
+            animalRepository.save(animal);
+        }
+
+        // Notifica a ONG
+        if (animal.getOng() != null) {
+
+            notificacaoService.criar(
+                    animal.getOng(),
+                    "Candidatura cancelada",
+                    "O adotante desistiu da candidatura para adotar "
+                            + animal.getNome() + ".",
+                    adocao.getId()
+            );
+        }
+    }
+
+    @Transactional
+    public void finalizarAdocao(Long idAdocao, Usuario usuario) {
+        if (usuario.getTipoUsuario() != TipoUsuario.ROLE_ONG) {
+            throw new BusinessException(
+                    "Apenas ONGs podem finalizar adoções"
+            );
+        }
+
+        RespostaAdocao adocao = respostaAdocaoRepository.findById(idAdocao)
+                .orElseThrow(() -> new NotFoundException(
+                        "Candidatura não encontrada"
+                ));
+
+        Animal animal = adocao.getAnimal();
+
+        // Verifica se a ONG autenticada é responsável pelo animal
+        if (animal.getOng() == null ||
+                !Objects.equals(animal.getOng().getId(), usuario.getId())) {
+
+            throw new BusinessException(
+                    "Você não tem permissão para finalizar esta adoção"
+            );
+        }
+
+        // Só permite finalizar candidaturas aprovadas
+        if (adocao.getStatus() != StatusAdocao.APROVADO &&
+                adocao.getStatus() != StatusAdocao.AGUARDANDO_RETIRADA) {
+
+            throw new BusinessException(
+                    "Esta candidatura não está aguardando a conclusão da adoção"
+            );
+        }
+
+        // Verifica se o animal está reservado para essa adoção
+        if (animal.getStatus() != Status.EM_ANDAMENTO) {
+
+            throw new BusinessException(
+                    "O animal não está em processo de adoção"
+            );
+        }
+
+        // Atualiza os status
+        adocao.setStatus(StatusAdocao.CONCLUIDO);
+        animal.setStatus(Status.ADOTADO);
+
+        respostaAdocaoRepository.save(adocao);
+        animalRepository.save(animal);
+
+        // Notifica o adotante
+        notificacaoService.criar(
+                adocao.getUsuario(),
+                "Adoção concluída!",
+                "A adoção de " + animal.getNome()
+                        + " foi concluída. Parabéns pela adoção!",
+                adocao.getId()
+        );
+    }
+
     public RespostaAdocaoResponseDTO buscarPorId(
             Long id,
             Usuario usuario
@@ -195,8 +343,8 @@ public class FormularioAdocaoService {
         Animal animal =
                 respostaAdocao.getAnimal();
 
-        if (animal.getOng() == null || animal.getOng().getId() != usuario.getId()
-        ) {
+        if (animal.getOng() == null
+                || !Objects.equals(animal.getOng().getId(), usuario.getId())) {
             throw new BusinessException(
                     "Você não tem permissão para visualizar esta candidatura"
             );

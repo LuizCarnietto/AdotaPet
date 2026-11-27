@@ -1,0 +1,8 @@
+/* Texto "Adicione cor à vida deles" */
+.home-hero-subtitle {
+  left: clamp(120px, 18.2vw, 350px) !important;
+  bottom: 12px !important;
+  margin: 0 !important;
+  font-size: clamp(56px, 5vw, 96px) !important;
+  line-height: 0.75 !important;
+}

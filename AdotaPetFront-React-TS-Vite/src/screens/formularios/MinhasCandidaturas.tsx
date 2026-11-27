@@ -54,6 +54,8 @@ function formatarStatus(status: string) {
       return "Aguardando retirada";
     case "CONCLUIDO":
       return "Concluída";
+    case "CANCELADO_PELO_ADOTANTE":
+      return "Cancelada pelo adotante";
     default:
       return status;
   }
@@ -73,6 +75,8 @@ export default function MinhasCandidaturas() {
 
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  const [cancelandoId, setCancelandoId] = useState<number | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -102,6 +106,38 @@ export default function MinhasCandidaturas() {
 
     buscarCandidaturas();
   }, [navigate]);
+
+  const cancelarCandidatura = async (id: number) => {
+    const confirmou = window.confirm(
+      "Tem certeza de que deseja cancelar esta candidatura? A ONG será informada sobre sua desistência.",
+    );
+
+    if (!confirmou) return;
+
+    try {
+      setCancelandoId(id);
+
+      await apiService.patch(`/adocao/${id}/cancelar`);
+
+      setCandidaturas((anteriores) =>
+        anteriores.map((candidatura) =>
+          candidatura.id === id
+            ? {
+                ...candidatura,
+                status: "CANCELADO_PELO_ADOTANTE",
+              }
+            : candidatura,
+        ),
+      );
+
+      alert("Sua candidatura foi cancelada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao cancelar candidatura:", error);
+      alert("Não foi possível cancelar sua candidatura. Tente novamente.");
+    } finally {
+      setCancelandoId(null);
+    }
+  };
 
   const entrarEmContato = (telefone: string, nomeAnimal: string) => {
     const apenasNumeros = telefone.replace(/\D/g, "");
@@ -169,7 +205,7 @@ export default function MinhasCandidaturas() {
             <button
               type="button"
               onClick={() => navigate("/listaadotar")}
-              className="mt-6 px-6 h-[40px] rounded-[20px] bg-[#36c3ff] text-white hover:bg-[#1ab0f0] transition-colors duration-200"
+              className="mt-6 px-6 h-[40px] rounded-[22px] bg-[#36c3ff] text-white hover:bg-[#1ab0f0] transition-colors duration-200"
             >
               Encontrar um animal
             </button>
@@ -183,6 +219,16 @@ export default function MinhasCandidaturas() {
               const aprovada =
                 candidatura.status === "APROVADO" ||
                 candidatura.status === "AGUARDANDO_RETIRADA";
+
+              const cancelada =
+                candidatura.status === "CANCELADO_PELO_ADOTANTE";
+
+              const podeCancelar = [
+                "EM_ANALISE",
+                "AGUARDANDO_APROVACAO",
+                "APROVADO",
+                "AGUARDANDO_RETIRADA",
+              ].includes(candidatura.status);
 
               return (
                 <article
@@ -239,7 +285,9 @@ export default function MinhasCandidaturas() {
                           ? "bg-green-50 text-green-800"
                           : candidatura.status === "REPROVADO"
                             ? "bg-red-50 text-red-700"
-                            : "bg-amber-50 text-amber-800"
+                            : cancelada
+                              ? "bg-slate-100 text-slate-600"
+                              : "bg-amber-50 text-amber-800"
                       }`}
                     >
                       <span className="text-sm font-bold">
@@ -253,7 +301,9 @@ export default function MinhasCandidaturas() {
                             ? "Sua candidatura não foi aprovada pela ONG."
                             : candidatura.status === "CONCLUIDO"
                               ? "A adoção foi concluída. Desejamos muitas felicidades a vocês!"
-                              : "Sua candidatura foi recebida e está aguardando a análise da ONG."}
+                              : cancelada
+                                ? "Você desistiu desta candidatura. O cancelamento foi registrado."
+                                : "Sua candidatura foi recebida e está aguardando a análise da ONG."}
                       </p>
                     </div>
 
@@ -277,6 +327,21 @@ export default function MinhasCandidaturas() {
                           Contato da ONG ainda não disponível.
                         </p>
                       ))}
+
+                    {podeCancelar && (
+                      <button
+                        type="button"
+                        onClick={() => cancelarCandidatura(candidatura.id)}
+                        disabled={cancelandoId === candidatura.id}
+                        className="w-full mt-3 h-[42px] flex items-center justify-center rounded-[22px] border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {cancelandoId === candidatura.id
+                          ? "Cancelando..."
+                          : aprovada
+                            ? "Desistir da adoção"
+                            : "Cancelar candidatura"}
+                      </button>
+                    )}
                   </div>
                 </article>
               );

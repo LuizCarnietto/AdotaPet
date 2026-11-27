@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
-
+import "./HomePage.css";
 
 const token = localStorage.getItem("token");
 const estaLogado = !!token;
@@ -51,42 +50,84 @@ export default function HomePage() {
 
   return (
     <div style={styles.body}>
-    {estaLogado ? (
-      <Header corFundo="rgb(54, 195, 255)" logoSrc="/imagens/logoEscrita01.png"
-      homeComoAdotar={true}
-      mostrarRegistrarAnimal={ehOng}
-      />
-    ) : (
-      <header style={styles.header}>
-        <nav style={styles.nav}>
-          <Link to="/login" className="nav-link" style={styles.navLink} onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')} onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}>
-            Entrar
-          </Link>
-          <Link to="/listaadotar" className="nav-link" style={styles.navLink} onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')} onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}>
-            Adotar
-          </Link>
-          <Link to="/">
-            <img
-              src="/imagens/logoEscrita.png"
-              alt="Logo Escrita"
-              style={styles.logoNav}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = "0.7";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = "1";
-              }}
-            />
-          </Link>
-          <a href="#sobre" className="nav-link" style={styles.navLink} onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')} onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}>
-            Sobre
-          </a>
-          <a href="#faq" className="nav-link" style={styles.navLink} onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')} onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}>
-            F.A.Q
-          </a>
-        </nav>
-      </header>
-    )}
+      {estaLogado ? (
+        <Header
+          corFundo="rgb(54, 195, 255)"
+          logoSrc="/imagens/logoEscrita01.png"
+          homeComoAdotar={true}
+          mostrarRegistrarAnimal={ehOng}
+        />
+      ) : (
+        <header style={styles.header}>
+          <nav style={styles.nav}>
+            <Link
+              to="/login"
+              className="nav-link"
+              style={styles.navLink}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.textDecoration = "underline")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.textDecoration = "none")
+              }
+            >
+              Entrar
+            </Link>
+            <Link
+              to="/listaadotar"
+              className="nav-link"
+              style={styles.navLink}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.textDecoration = "underline")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.textDecoration = "none")
+              }
+            >
+              Adotar
+            </Link>
+            <Link to="/">
+              <img
+                src="/imagens/logoEscrita.png"
+                alt="Logo Escrita"
+                style={styles.logoNav}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.opacity = "0.7";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.opacity = "1";
+                }}
+              />
+            </Link>
+            <a
+              href="#sobre"
+              className="nav-link"
+              style={styles.navLink}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.textDecoration = "underline")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.textDecoration = "none")
+              }
+            >
+              Sobre
+            </a>
+            <a
+              href="#faq"
+              className="nav-link"
+              style={styles.navLink}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.textDecoration = "underline")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.textDecoration = "none")
+              }
+            >
+              F.A.Q
+            </a>
+          </nav>
+        </header>
+      )}
 
       <div style={styles.divInicial}>
         <div style={{ position: "relative", width: "100%", height: "100%" }}>
@@ -96,7 +137,7 @@ export default function HomePage() {
             alt="Gato e Cachorro"
             style={styles.heroImagem}
           />
-          <p style={styles.heroSubtitulo}>
+          <p style={styles.heroSubtitulo} className="home-hero-subtitle">
             Adicione <span style={{ color: "#FFEA00" }}>cor</span> à <br />
             vida deles
           </p>
@@ -155,14 +196,14 @@ export default function HomePage() {
 
       {/* CTA */}
       {!estaLogado && (
-      <>
-        <h1 style={{ ...styles.titPreto, marginBottom: 44 }}>
-          Quer fazer parte disso?
-        </h1>
-        <Link to="/cadastros/CadastroUsuario" style={styles.botaoRegistre}>
-          Registre-se agora
-        </Link>
-      </>
+        <>
+          <h1 style={{ ...styles.titPreto, marginBottom: 44 }}>
+            Quer fazer parte disso?
+          </h1>
+          <Link to="/cadastros/CadastroUsuario" style={styles.botaoRegistre}>
+            Registre-se agora
+          </Link>
+        </>
       )}
 
       {/* FAQ */}

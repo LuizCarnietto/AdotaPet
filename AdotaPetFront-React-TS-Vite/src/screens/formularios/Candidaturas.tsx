@@ -163,6 +163,36 @@ export default function Candidaturas() {
     }
   };
 
+  const finalizarAdocao = async (candidatura: Candidatura) => {
+    const confirmou = window.confirm(
+      `Confirma que o animal ${nomeDoAnimal(candidatura)} já foi entregue ao adotante?`,
+    );
+
+    if (!confirmou) return;
+
+    try {
+      setProcessando(true);
+
+      await apiService.patch(`/adocao/${candidatura.id}/finalizar`);
+
+      setCandidaturas((atual) =>
+        atual.map((item) =>
+          item.id === candidatura.id ? { ...item, status: "CONCLUIDO" } : item,
+        ),
+      );
+
+      alert("Adoção finalizada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao finalizar adoção:", error);
+
+      alert(
+        error.response?.data?.message || "Não foi possível finalizar a adoção.",
+      );
+    } finally {
+      setProcessando(false);
+    }
+  };
+
   const formatarStatus = (status?: string) => {
     switch (status) {
       case "EM_ANALISE":
@@ -177,6 +207,15 @@ export default function Candidaturas() {
       case "REPROVADO":
         return "Reprovado";
 
+      case "AGUARDANDO_RETIRADA":
+        return "Aguardando retirada";
+
+      case "CONCLUIDO":
+        return "Adoção concluída";
+
+      case "CANCELADO_PELO_ADOTANTE":
+        return "Cancelada pelo adotante";
+
       default:
         return status || "Não informado";
     }
@@ -188,6 +227,12 @@ export default function Candidaturas() {
         return "status status-aprovado";
 
       case "REPROVADO":
+        return "status status-reprovado";
+
+      case "CONCLUIDO":
+        return "status status-aprovado";
+
+      case "CANCELADO_PELO_ADOTANTE":
         return "status status-reprovado";
 
       default:
@@ -250,7 +295,11 @@ export default function Candidaturas() {
         );
 
       case "aprovadas":
-        return candidatura.status === "APROVADO";
+        return (
+          candidatura.status === "APROVADO" ||
+          candidatura.status === "AGUARDANDO_RETIRADA" ||
+          candidatura.status === "CONCLUIDO"
+        );
 
       case "reprovadas":
         return candidatura.status === "REPROVADO";
@@ -268,7 +317,10 @@ export default function Candidaturas() {
   ).length;
 
   const quantidadeAprovadas = candidaturas.filter(
-    (c) => c.status === "APROVADO",
+    (c) =>
+      c.status === "APROVADO" ||
+      c.status === "AGUARDANDO_RETIRADA" ||
+      c.status === "CONCLUIDO",
   ).length;
 
   const quantidadeReprovadas = candidaturas.filter(
@@ -568,6 +620,19 @@ export default function Candidaturas() {
                     {formatarStatus(candidatura.status)}
                   </span>
 
+                  {(candidatura.status === "APROVADO" ||
+                    candidatura.status === "AGUARDANDO_RETIRADA") && (
+                    <button
+                      type="button"
+                      className="botao-finalizar-card"
+                      disabled={processando}
+                      onClick={() => finalizarAdocao(candidatura)}
+                    >
+                      <Check size={17} />
+                      {processando ? "Finalizando..." : "Finalizar adoção"}
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     className="botao-formulario"
@@ -850,6 +915,35 @@ function Estilos() {
         .botao-formulario:hover {
           background: rgb(26, 176, 240);
         }
+
+
+        .botao-finalizar-card {
+          height: 39px;
+          padding: 0 16px;
+          border: none;
+          border-radius: 20px;
+          background: #16a34a;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          cursor: pointer;
+          font-family: "Inter", sans-serif;
+          font-size: 13px;
+          white-space: nowrap;
+          transition: background-color 0.2s ease;
+        }
+
+        .botao-finalizar-card:hover {
+          background: #15803d;
+        }
+
+        .botao-finalizar-card:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+
 
         .formulario-card {
           background: white;
@@ -1155,6 +1249,10 @@ function Estilos() {
 
           .botao-formulario {
             justify-content: center;
+            width: 100%;
+          }
+
+          .botao-finalizar-card {
             width: 100%;
           }
 
