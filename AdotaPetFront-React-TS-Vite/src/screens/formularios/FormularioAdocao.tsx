@@ -486,7 +486,7 @@ export default function FormularioAdocao() {
         const respostasFormulario = Array(questionario.length).fill("");
 
         (data.respostas || []).forEach((item: RespostaAdocao) => {
-          const index = item.perguntaId - 11;
+          const index = item.perguntaId - 1;
 
           if (index >= 0 && index < questionario.length) {
             respostasFormulario[index] = item.resposta || "";
@@ -564,7 +564,7 @@ export default function FormularioAdocao() {
         numero: formulario.numero,
 
         respostas: formulario.respostas.map((resposta, index) => ({
-          perguntaId: index + 11,
+          perguntaId: index + 1,
           resposta: resposta,
         })),
       };
