@@ -685,6 +685,41 @@ export default function PerfilAdotante() {
           <PawPrint className="h-5 w-5 shrink-0 text-[#36c3ff] transition-transform group-hover:translate-x-1" />
         </Link>
       </main>
+
+      <footer className="mt-8 border-t border-gray-150 bg-white">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-5 px-6 py-8 text-center sm:flex-row sm:text-left">
+          <div>
+            <span className="text-lg font-bold text-[#168fc5]">Adota Pet</span>
+
+            <p className="mt-1 text-xs text-gray-500">
+              © 2026 Adota Pet • {nome}. Todos os direitos reservados.
+            </p>
+          </div>
+
+          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-3 text-xs font-medium text-gray-500">
+            <Link
+              to="/termos"
+              className="transition-colors duration-150 hover:text-[#168fc5]"
+            >
+              Termos de adoção
+            </Link>
+
+            <Link
+              to="/privacidade"
+              className="transition-colors duration-150 hover:text-[#168fc5]"
+            >
+              Política de privacidade
+            </Link>
+
+            <Link
+              to="/"
+              className="transition-colors duration-150 hover:text-[#168fc5]"
+            >
+              Início
+            </Link>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }
